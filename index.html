@@ -2,316 +2,281 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سباق التحدي</title>
-    <!-- manifest for PWA installation -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogInNtcSIsCiAgInNob3J0X25hbWUiOiAi2LPYqNin2YIg2KfZhNiz2YrYp9ix2KkiLAogICJzdGFydV91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzIyMjIyMiIsCiAgInRoZW1lX2NvbG9yIjogIiNmZjAwMDAiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi1pY29ucy1wbmcuZmxhdGljb24uY29tLzUxMi83NDEvNzQxNDA3LnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المصحف المحمول - إهداء من عمر منير</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #ff4757;
-            --road-color: #2f3542;
-        }
-
         body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background-color: #2f3640;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            touch-action: none; /* Prevents zooming/scrolling on mobile */
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+            background-attachment: fixed;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-
-        #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(to bottom, #1e272e, #2f3542);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #road {
-            position: relative;
-            width: 80%;
-            max-width: 400px;
-            height: 100%;
-            background-color: var(--road-color);
-            border-left: 5px solid white;
-            border-right: 5px solid white;
-            overflow: hidden;
-        }
-
-        .lane-line {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 6px;
-            height: 40px;
-            background-color: #ffffff99;
-            animation: roadMove 0.5s linear infinite;
-        }
-
-        @keyframes roadMove {
-            0% { top: -50px; }
-            100% { top: 100%; }
-        }
-
-        #car {
-            position: absolute;
-            bottom: 100px;
-            left: 50%;
-            width: 50px;
-            height: 80px;
-            transform: translateX(-50%);
-            z-index: 10;
-            transition: left 0.1s ease-out;
-        }
-
-        .obstacle {
-            position: absolute;
-            width: 50px;
-            height: 80px;
-            background-color: #eccc68;
-            border-radius: 5px;
-            z-index: 5;
-        }
-
-        #score {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-            font-size: 24px;
-            background: rgba(0,0,0,0.5);
-            padding: 5px 15px;
-            border-radius: 20px;
-            z-index: 20;
-        }
-
-        /* Mobile Controls */
-        .controls {
-            position: absolute;
-            bottom: 30px;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            padding: 0 20px;
-            box-sizing: border-box;
-            z-index: 100;
-        }
-
-        .btn {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 30px;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .btn:active {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        #game-over {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 15px;
-            text-align: center;
-            z-index: 200;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            width: 80%;
         }
-
-        #game-over h2 { color: var(--primary-color); }
-        #game-over button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            font-size: 18px;
-            border-radius: 5px;
-            margin-top: 15px;
-            cursor: pointer;
+        /* تصغير عناصر القائمة قليلاً كما طلبت */
+        .surah-item {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+        .surah-item:hover { background: rgba(255, 255, 255, 0.1); }
+        .active-surah {
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-right: 3px solid #fbbf24;
+        }
+        /* تأثير الزهور المتساقطة */
+        .flower {
+            position: fixed;
+            top: -10%;
+            z-index: 9999;
+            user-select: none;
+            cursor: default;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); }
+        }
+        .loading-spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 2px solid #fff;
+            width: 14px;
+            height: 14px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Modal Style */
+        #welcome-modal {
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
         }
     </style>
 </head>
-<body>
+<body class="text-white p-4 pb-24">
 
-<div id="game-container">
-    <div id="score">المسافة: 0</div>
-    
-    <div id="road">
-        <!-- Lane lines will be added by JS -->
-        <svg id="car" viewBox="0 0 100 200">
-            <!-- Simple SVG Car -->
-            <rect x="10" y="10" width="80" height="180" rx="15" fill="#ff4757" />
-            <rect x="20" y="40" width="60" height="40" rx="5" fill="#2f3542" />
-            <rect x="15" y="140" width="10" height="20" rx="2" fill="yellow" />
-            <rect x="75" y="140" width="10" height="20" rx="2" fill="yellow" />
-            <rect x="20" y="15" width="20" height="10" rx="2" fill="#fff" />
-            <rect x="60" y="15" width="20" height="10" rx="2" fill="#fff" />
-        </svg>
+    <!-- رسالة الترحيب (تظهر مرة واحدة) -->
+    <div id="welcome-modal" class="fixed inset-0 z-[200] flex items-center justify-center hidden p-6 text-center">
+        <div class="glass-card p-8 max-w-sm w-full border-yellow-500/50 border-2">
+            <div class="text-4xl mb-4">🌸</div>
+            <h2 class="text-2xl font-bold mb-2">مرحباً بك</h2>
+            <p class="text-yellow-400 mb-6 font-bold text-lg">تم إنشاء التطبيق من عمر منير</p>
+            <button onclick="closeWelcome()" class="bg-yellow-500 text-black px-8 py-2 rounded-full font-bold hover:scale-105 transition">ابدأ الاستماع</button>
+        </div>
     </div>
 
-    <div class="controls">
-        <div class="btn" id="leftBtn">◀</div>
-        <div class="btn" id="rightBtn">▶</div>
+    <div class="max-w-xl mx-auto">
+        <header class="text-center my-6">
+            <h1 class="text-3xl font-bold mb-1">المصحف الكامل</h1>
+            <p class="text-yellow-400 text-sm">بصوت الشيخ عبد الباسط عبد الصمد</p>
+            <div id="offline-badge" class="hidden mt-2 inline-block bg-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded border border-green-500/50">
+                وضع عدم الاتصال نشط
+            </div>
+        </header>
+
+        <!-- Player -->
+        <div class="glass-card p-5 mb-6 sticky top-4 z-50 shadow-2xl">
+            <div id="current-surah-name" class="text-lg font-bold text-center mb-3 text-yellow-400">اختر سورة</div>
+            <audio id="main-audio"></audio>
+            
+            <div class="mb-3">
+                <input type="range" id="progress-bar" value="0" class="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-yellow-500">
+                <div class="flex justify-between text-[10px] mt-1 opacity-60">
+                    <span id="current-time">00:00</span>
+                    <span id="duration-time">00:00</span>
+                </div>
+            </div>
+
+            <div class="flex justify-center items-center gap-6">
+                <button onclick="prevSurah()" class="opacity-80 hover:opacity-100">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18V6h2v12H6zm3.5-6L18 6v12l-8.5-6z"/></svg>
+                </button>
+                <button onclick="togglePlay()" class="bg-yellow-500 text-black p-3 rounded-full hover:scale-105 transition-transform">
+                    <svg id="play-icon" class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button onclick="nextSurah()" class="opacity-80 hover:opacity-100">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16 18h2V6h-2v12zM6 18l8.5-6L6 6v12z"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- قسم الدعاء -->
+        <div class="glass-card p-4 mb-4 border-l-4 border-yellow-500 italic text-sm opacity-90 leading-relaxed">
+            <span class="text-yellow-400 font-bold">دعاء:</span>
+            "اللهم اجعل القرآن الكريم ربيع قلوبنا، ونور صدورنا، وجلاء أحزاننا، وذهاب همومنا وغمومنا، وذكرنا منه ما نسينا، وعلمنا منه ما جهلنا."
+        </div>
+
+        <div class="mb-4">
+            <input type="text" id="search-input" placeholder="ابحث عن سورة..." class="w-full p-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500/50">
+        </div>
+
+        <!-- Surah List -->
+        <div id="surah-list" class="space-y-1.5 max-h-[50vh] overflow-y-auto pr-1">
+            <!-- سيتم تعبئة الـ 114 سورة هنا -->
+        </div>
+
+        <footer class="mt-8 text-center text-[10px] opacity-40">
+            تم التطوير بواسطة عمر منير &copy; 2024
+        </footer>
     </div>
 
-    <div id="game-over">
-        <h2>انتهت اللعبة!</h2>
-        <p id="final-score">نقاطك: 0</p>
-        <button onclick="resetGame()">إعادة المحاولة</button>
-    </div>
-</div>
-
-<script>
-    const road = document.getElementById('road');
-    const car = document.getElementById('car');
-    const scoreElement = document.getElementById('score');
-    const gameOverScreen = document.getElementById('game-over');
-    const finalScoreText = document.getElementById('final-score');
-    
-    let score = 0;
-    let gameActive = true;
-    let carPos = 50; // percentage
-    let speed = 5;
-    let obstacles = [];
-    let frame = 0;
-
-    // Create moving road lines
-    function createLines() {
-        for(let i=0; i<10; i++) {
-            let line = document.createElement('div');
-            line.className = 'lane-line';
-            line.style.top = (i * 100) + 'px';
-            road.appendChild(line);
-        }
-    }
-
-    // Controls
-    const moveLeft = () => { if(carPos > 15) carPos -= 8; updateCarPos(); };
-    const moveRight = () => { if(carPos < 85) carPos += 8; updateCarPos(); };
-
-    document.getElementById('leftBtn').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); });
-    document.getElementById('rightBtn').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); });
-    
-    // Keyboard for desktop testing
-    document.addEventListener('keydown', (e) => {
-        if(e.key === 'ArrowLeft') moveLeft();
-        if(e.key === 'ArrowRight') moveRight();
-    });
-
-    function updateCarPos() {
-        car.style.left = carPos + '%';
-    }
-
-    function createObstacle() {
-        const obs = document.createElement('div');
-        obs.className = 'obstacle';
-        // Randomly pick a lane (Left, Middle, Right)
-        const lanes = [20, 50, 80];
-        const lane = lanes[Math.floor(Math.random() * lanes.length)];
-        obs.style.left = lane + '%';
-        obs.style.top = '-100px';
+    <script>
+        const CACHE_NAME = 'quran-full-cache-v1';
+        const BASE_URL = "https://server7.mp3quran.net/basit/";
         
-        // Random color
-        const colors = ['#eccc68', '#7bed9f', '#70a1ff', '#ffa502'];
-        obs.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        
-        road.appendChild(obs);
-        obstacles.push({
-            el: obs,
-            top: -100,
-            lane: lane
-        });
-    }
+        // توليد قائمة الـ 114 سورة برمجياً
+        const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
-    function gameLoop() {
-        if(!gameActive) return;
+        const surahs = surahNames.map((name, index) => ({
+            id: index + 1,
+            name: name,
+            file: (index + 1).toString().padStart(3, '0') + ".mp3"
+        }));
 
-        frame++;
-        if(frame % 100 === 0) {
-            createObstacle();
-            speed += 0.2; // Slowly increase difficulty
+        let currentIndex = -1;
+        const audio = document.getElementById('main-audio');
+        const playIcon = document.getElementById('play-icon');
+        const progressBar = document.getElementById('progress-bar');
+        const currentTimeEl = document.getElementById('current-time');
+        const durationTimeEl = document.getElementById('duration-time');
+        const surahListEl = document.getElementById('surah-list');
+
+        function init() {
+            // Check for first time visitor
+            if (!localStorage.getItem('visited')) {
+                document.getElementById('welcome-modal').classList.remove('hidden');
+            }
+            
+            window.addEventListener('online', updateStatus);
+            window.addEventListener('offline', updateStatus);
+            updateStatus();
+            renderSurahs(surahs);
+            startFlowerRain();
         }
 
-        obstacles.forEach((obs, index) => {
-            obs.top += speed;
-            obs.el.style.top = obs.top + 'px';
+        function closeWelcome() {
+            localStorage.setItem('visited', 'true');
+            document.getElementById('welcome-modal').classList.add('hidden');
+        }
 
-            // Collision detection
-            const carRect = car.getBoundingClientRect();
-            const obsRect = obs.el.getBoundingClientRect();
+        function updateStatus() {
+            const badge = document.getElementById('offline-badge');
+            badge.classList.toggle('hidden', navigator.onLine);
+        }
 
-            if (
-                carRect.left < obsRect.right &&
-                carRect.right > obsRect.left &&
-                carRect.top < obsRect.bottom &&
-                carRect.bottom > obsRect.top
-            ) {
-                endGame();
+        // تساقط الزهور
+        function startFlowerRain() {
+            const flowers = ['🌸', '🌺', '🌼', '🌷'];
+            setInterval(() => {
+                const f = document.createElement('div');
+                f.className = 'flower';
+                f.innerText = flowers[Math.floor(Math.random() * flowers.length)];
+                f.style.left = Math.random() * 100 + 'vw';
+                f.style.fontSize = (Math.random() * 10 + 10) + 'px';
+                f.style.duration = (Math.random() * 3 + 4) + 's';
+                f.style.opacity = Math.random() * 0.5 + 0.3;
+                f.style.animationDuration = f.style.duration;
+                document.body.appendChild(f);
+                setTimeout(() => f.remove(), 7000);
+            }, 600);
+        }
+
+        async function isCached(url) {
+            const cache = await caches.open(CACHE_NAME);
+            return !!(await cache.match(url));
+        }
+
+        async function downloadToCache(url, id) {
+            const btn = document.getElementById(`dl-${id}`);
+            btn.innerHTML = '<div class="loading-spinner"></div>';
+            try {
+                const cache = await caches.open(CACHE_NAME);
+                await cache.add(url);
+                renderSurahs(surahs);
+            } catch (error) {
+                btn.innerHTML = '⚠️';
             }
+        }
 
-            // Remove off-screen obstacles
-            if(obs.top > window.innerHeight) {
-                obs.el.remove();
-                obstacles.splice(index, 1);
-                score += 10;
-                scoreElement.innerText = 'المسافة: ' + score;
+        async function renderSurahs(data) {
+            surahListEl.innerHTML = '';
+            for (let i = 0; i < data.length; i++) {
+                const s = data[i];
+                const url = BASE_URL + s.file;
+                const cached = await isCached(url);
+                
+                const item = document.createElement('div');
+                item.className = `surah-item glass-card flex items-center justify-between cursor-pointer transition-all ${currentIndex === (s.id - 1) ? 'active-surah' : ''}`;
+                item.onclick = () => loadSurah(s.id - 1);
+                
+                item.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] opacity-40 font-mono w-6 text-center">${s.id}</span>
+                        <span class="font-bold">${s.name}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        ${cached ? 
+                            '<span class="text-green-400 text-[9px] bg-green-500/10 px-1.5 py-0.5 rounded">محفوظة</span>' : 
+                            `<button id="dl-${s.id}" onclick="event.stopPropagation(); downloadToCache('${url}', ${s.id})" class="text-[10px] text-yellow-500 border border-yellow-500/30 px-2 py-0.5 rounded hover:bg-yellow-500 hover:text-black">حفظ</button>`
+                        }
+                    </div>
+                `;
+                surahListEl.appendChild(item);
             }
-        });
+        }
 
-        requestAnimationFrame(gameLoop);
-    }
+        function loadSurah(index) {
+            currentIndex = index;
+            const surah = surahs[index];
+            audio.src = BASE_URL + surah.file;
+            document.getElementById('current-surah-name').innerText = "سورة " + surah.name;
+            audio.play();
+            updatePlayIcon(true);
+            renderSurahs(surahs);
+        }
 
-    function endGame() {
-        gameActive = false;
-        gameOverScreen.style.display = 'block';
-        finalScoreText.innerText = 'نقاطك: ' + score;
-    }
+        function togglePlay() {
+            if (currentIndex === -1) return loadSurah(0);
+            if (audio.paused) { audio.play(); updatePlayIcon(true); }
+            else { audio.pause(); updatePlayIcon(false); }
+        }
 
-    function resetGame() {
-        // Clear obstacles
-        obstacles.forEach(o => o.el.remove());
-        obstacles = [];
-        score = 0;
-        speed = 5;
-        carPos = 50;
-        frame = 0;
-        gameActive = true;
-        updateCarPos();
-        scoreElement.innerText = 'المسافة: 0';
-        gameOverScreen.style.display = 'none';
-        gameLoop();
-    }
+        function updatePlayIcon(playing) {
+            playIcon.innerHTML = playing ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>' : '<path d="M8 5v14l11-7z"/>';
+        }
 
-    // Initialize
-    createLines();
-    updateCarPos();
-    gameLoop();
+        function nextSurah() { if (currentIndex < surahs.length - 1) loadSurah(currentIndex + 1); }
+        function prevSurah() { if (currentIndex > 0) loadSurah(currentIndex - 1); }
 
-    // Register Service Worker for PWA (Minimal)
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('data:text/javascript;base64,c2VsZixhZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJyxlPT57fSksYWRkRXZlbnRMaXN0ZW5lcignZmV0Y2gnLGU9PmVyZXNwb25kV2l0aChmZXRjaChlLnJlcXVlc3QpKSk7').catch(() => {});
-        });
-    }
-</script>
+        audio.ontimeupdate = () => {
+            const p = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = p || 0;
+            currentTimeEl.innerText = formatTime(audio.currentTime);
+            durationTimeEl.innerText = formatTime(audio.duration);
+        };
 
+        progressBar.oninput = () => audio.currentTime = (progressBar.value * audio.duration) / 100;
+        audio.onended = () => nextSurah();
+
+        function formatTime(s) {
+            if (isNaN(s)) return "00:00";
+            return Math.floor(s/60).toString().padStart(2,'0') + ":" + Math.floor(s%60).toString().padStart(2,'0');
+        }
+
+        document.getElementById('search-input').oninput = (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = surahs.filter(s => s.name.includes(term));
+            renderSurahs(filtered);
+        };
+
+        init();
+    </script>
 </body>
 </html>
 
