@@ -2,9 +2,18 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مواقيت الصلاة · تعز · تقويم تساقط الثلوج</title>
+    <!-- تحسين العرض على الهواتف وإلغاء التصغير التلقائي -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1a2f3f" media="(prefers-color-scheme: dark)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="مواقيت تعز">
+    <link rel="apple-touch-icon" href="#icon-apple" id="apple-touch-icon">
+    <link rel="icon" type="image/png" href="#icon-favicon" id="favicon">
+    
+    <title>مواقيت تعز · تطبيق التقويم</title>
     <style>
+        /* نفس الأنماط السابقة مع إضافات لتحسين تجربة التطبيق */
         * {
             margin: 0;
             padding: 0;
@@ -21,10 +30,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            padding: 0.5rem;
+            /* دعم المنطقة الآمنة للهواتف ذات الشق */
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
-        /* حاوية الثلج (خلفية متحركة) */
+        /* حاوية الثلج */
         #snow-container {
             position: fixed;
             top: 0;
@@ -38,27 +49,21 @@
         .main-card {
             position: relative;
             z-index: 10;
-            background: rgba(10, 25, 40, 0.55);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 3rem 1rem 3rem 1rem;
-            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(173, 216, 230, 0.2) inset;
+            background: rgba(10, 25, 40, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 2.5rem 1rem 2.5rem 1rem;
+            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(200, 230, 255, 0.2) inset;
             max-width: 800px;
             width: 100%;
-            padding: 2rem 1.8rem;
+            padding: 1.8rem 1.5rem;
             transition: 0.3s;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
         .header h1 {
-            font-size: 2.5rem;
+            font-size: 2.3rem;
             font-weight: 300;
-            letter-spacing: 2px;
             text-shadow: 0 0 6px #8fcbff, 0 0 20px #3e6c9e;
             color: #f0f9ff;
             border-bottom: 1px dashed #7fa9c9;
@@ -67,141 +72,126 @@
         }
 
         .header h1 span {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             background: #2c4b6c;
             padding: 0.2rem 0.8rem;
             border-radius: 40px;
             margin-right: 0.5rem;
-            font-weight: 300;
-            vertical-align: middle;
         }
 
         .date-compact {
             display: flex;
             justify-content: space-between;
-            background: rgba(0, 20, 40, 0.6);
+            background: rgba(0, 20, 40, 0.7);
             border-radius: 60px;
-            padding: 0.7rem 1.5rem;
+            padding: 0.8rem 1.5rem;
             margin: 1.5rem 0 2rem 0;
             border: 1px solid #5688b7;
             box-shadow: 0 4px 10px rgba(0, 10, 20, 0.6);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
 
-        .gregorian, .hijri {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .gregorian i, .hijri i {
-            font-size: 1.6rem;
-            opacity: 0.8;
-        }
-
-        /* شبكة مواقيت الصلاة */
         .prayer-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0.9rem;
             margin: 2rem 0 2.2rem;
         }
 
         .prayer-item {
-            background: rgba(12, 30, 48, 0.7);
+            background: rgba(12, 30, 48, 0.8);
             border-radius: 2rem 0.5rem 2rem 0.5rem;
-            padding: 1rem 0.6rem;
-            text-align: center;
+            padding: 0.9rem 0.3rem;
             border: 1px solid #4f7ea3;
             box-shadow: 0 5px 0 #0d1f2c;
-            transition: 0.2s;
+            transition: 0.15s;
             backdrop-filter: blur(4px);
         }
 
-        .prayer-item:hover {
-            transform: translateY(-4px);
-            border-color: #b2d9f0;
-            background: rgba(20, 45, 70, 0.8);
+        .prayer-item:active {
+            transform: scale(0.97);
         }
 
         .prayer-name {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 400;
             color: #d3eaff;
-            margin-bottom: 0.4rem;
         }
 
         .prayer-time {
-            font-size: 2rem;
+            font-size: 1.9rem;
             font-weight: 600;
-            letter-spacing: 1px;
             background: linear-gradient(135deg, #ecf9ff, #c9e2f5);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 5px #9fc9ff;
         }
 
         .share-area {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 2.8rem 0 1rem;
+            margin: 2.5rem 0 1rem;
+            gap: 0.8rem;
+            flex-wrap: wrap;
         }
 
-        .share-btn {
+        .share-btn, #installBtn {
             background: linear-gradient(145deg, #1f4b6e, #0f2f4a);
             border: 1px solid #87b9de;
             color: #f0f9ff;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 300;
-            padding: 0.9rem 2.8rem;
+            padding: 0.8rem 2rem;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 8px 0 #0a1925, 0 10px 20px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 6px 0 #0a1925, 0 8px 16px rgba(0, 0, 0, 0.5);
             display: inline-flex;
             align-items: center;
-            gap: 1rem;
-            transition: 0.1s ease-out;
-            letter-spacing: 1px;
+            gap: 0.7rem;
+            transition: 0.08s ease-out;
+            border: none;
+            outline: none;
         }
 
-        .share-btn:active {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 #0a1925, 0 5px 12px black;
+        .share-btn:active, #installBtn:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #0a1925, 0 5px 12px black;
         }
 
-        .share-btn i {
-            font-size: 2rem;
-            filter: drop-shadow(0 2px 2px black);
+        #installBtn {
+            background: linear-gradient(145deg, #2a5f48, #1a3e30);
+            border-color: #8fc9b0;
         }
 
         .footer-note {
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             opacity: 0.7;
-            margin-top: 2rem;
+            margin-top: 1.8rem;
             border-top: 1px dashed #31638b;
             padding-top: 1rem;
         }
 
-        /* أيقونات بديلة (نصوص) */
         .icon-em {
             font-size: 1.8rem;
-            line-height: 1;
         }
 
-        /* تكيف صغير */
         @media (max-width: 480px) {
-            .main-card { padding: 1.2rem; }
+            .main-card { padding: 1.2rem 1rem; }
             .prayer-time { font-size: 1.6rem; }
             .date-compact { flex-direction: column; align-items: center; gap: 10px; }
+            .share-btn, #installBtn { font-size: 1.1rem; padding: 0.7rem 1.5rem; }
+        }
+
+        /* تحسين السحب للأسفل (Pull-to-refresh) في وضع التطبيق */
+        body {
+            overscroll-behavior: none;
         }
     </style>
 </head>
 <body>
 
-    <!-- قماش الثلج (خلفية متحركة) -->
     <canvas id="snow-container"></canvas>
 
     <main class="main-card">
@@ -209,26 +199,27 @@
             <h1>🌙 تعز <span>اليمن</span></h1>
         </div>
 
-        <!-- التقويم الميلادي والعربي (يتم تعبئته بالجافاسكربت) -->
         <div class="date-compact" id="dateDisplay">
             <div class="gregorian"><span class="icon-em">📅</span> <span id="gregorianDate">--</span></div>
             <div class="hijri"><span class="icon-em">☪️</span> <span id="hijriDate">--</span></div>
         </div>
 
-        <!-- مواقيت الصلاة (بيانات ثابتة نموذجية + تحديث عبر js) -->
         <div class="prayer-grid" id="prayerTimes">
-            <div class="prayer-item"><div class="prayer-name">الفجر</div><div class="prayer-time" id="fajr">05:12</div></div>
-            <div class="prayer-item"><div class="prayer-name">الشروق</div><div class="prayer-time" id="shurooq">06:35</div></div>
-            <div class="prayer-item"><div class="prayer-name">الظهر</div><div class="prayer-time" id="dhuhr">12:10</div></div>
-            <div class="prayer-item"><div class="prayer-name">العصر</div><div class="prayer-time" id="asr">15:28</div></div>
-            <div class="prayer-item"><div class="prayer-name">المغرب</div><div class="prayer-time" id="maghrib">17:56</div></div>
-            <div class="prayer-item"><div class="prayer-name">العشاء</div><div class="prayer-time" id="isha">19:15</div></div>
+            <div class="prayer-item"><div class="prayer-name">الفجر</div><div class="prayer-time" id="fajr">04:58</div></div>
+            <div class="prayer-item"><div class="prayer-name">الشروق</div><div class="prayer-time" id="shurooq">06:18</div></div>
+            <div class="prayer-item"><div class="prayer-name">الظهر</div><div class="prayer-time" id="dhuhr">12:06</div></div>
+            <div class="prayer-item"><div class="prayer-name">العصر</div><div class="prayer-time" id="asr">15:30</div></div>
+            <div class="prayer-item"><div class="prayer-name">المغرب</div><div class="prayer-time" id="maghrib">17:54</div></div>
+            <div class="prayer-item"><div class="prayer-name">العشاء</div><div class="prayer-time" id="isha">19:10</div></div>
         </div>
 
-        <!-- زر مشاركة التقويم -->
         <div class="share-area">
             <button class="share-btn" id="shareCalendarBtn">
                 <span class="icon-em">📆</span> مشاركة التقويم
+            </button>
+            <!-- زر التثبيت (يظهر فقط إذا كان متاحاً) -->
+            <button id="installBtn" style="display: none;">
+                <span class="icon-em">📲</span> تثبيت التطبيق
             </button>
         </div>
 
@@ -242,7 +233,6 @@
             // ---------- 1. خلفية الثلج (canvas) ----------
             const canvas = document.getElementById('snow-container');
             let ctx = canvas.getContext('2d');
-
             let width, height;
             let particles = [];
 
@@ -251,8 +241,7 @@
                 height = window.innerHeight;
                 canvas.width = width;
                 canvas.height = height;
-                // إعادة تعيين الجسيمات بما يتناسب مع الحجم الجديد
-                createSnowParticles(180);  // عدد حبات الثلج
+                createSnowParticles(200);
             }
 
             function createSnowParticles(count) {
@@ -261,10 +250,10 @@
                     particles.push({
                         x: Math.random() * width,
                         y: Math.random() * height,
-                        radius: Math.random() * 3.5 + 1.2,
-                        speedY: Math.random() * 1.2 + 0.3,
-                        speedX: Math.random() * 0.3 - 0.15,   // انجراف خفيف
-                        opacity: Math.random() * 0.6 + 0.3
+                        radius: Math.random() * 3.8 + 1.2,
+                        speedY: Math.random() * 1.4 + 0.3,
+                        speedX: Math.random() * 0.4 - 0.2,
+                        opacity: Math.random() * 0.7 + 0.3
                     });
                 }
             }
@@ -284,12 +273,7 @@
                 for (let p of particles) {
                     p.y += p.speedY;
                     p.x += p.speedX;
-
-                    // إعادة التدوير عند الخروج من الشاشة
-                    if (p.y > height + 10) {
-                        p.y = -10;
-                        p.x = Math.random() * width;
-                    }
+                    if (p.y > height + 10) { p.y = -10; p.x = Math.random() * width; }
                     if (p.x > width + 10) p.x = -10;
                     if (p.x < -10) p.x = width + 10;
                 }
@@ -301,147 +285,195 @@
                 requestAnimationFrame(animateSnow);
             }
 
-            window.addEventListener('resize', () => {
-                initCanvas();
-            });
-
+            window.addEventListener('resize', initCanvas);
             initCanvas();
             animateSnow();
 
-            // ---------- 2. حساب التاريخ الميلادي والهجري ----------
+            // ---------- 2. التواريخ ----------
             function getHijriDate(date) {
-                // تحويل بسيط (تقريب أم القرى) باستخدام مكتبة مدمجة - Intl.DateTimeFormat
-                // لكنها تعطي تقويماً عربياً قمرياً (قد يختلف دقة لكن للعرض مقبول)
                 try {
-                    const formatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                    });
+                    const formatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' });
                     return formatter.format(date);
                 } catch (e) {
-                    // fallback يدوي بسيط (فقط لعرض شيء)
-                    const hijriMonthNames = ["محرم", "صفر", "ربيع الأول", "ربيع الآخر", "جمادى الأولى", "جمادى الآخرة", "رجب", "شعبان", "رمضان", "شوال", "ذو القعدة", "ذو الحجة"];
-                    // ليس دقيقًا لكنه للاحتياط
-                    return "1 رمضان 1445 (تقريبي)";
+                    return "رمضان 1445 (تقريبي)";
                 }
             }
 
             function updateDates() {
                 const today = new Date();
-                // ميلادي بتنسيق جميل
                 const optionsGreg = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                const gregStr = today.toLocaleDateString('ar-EG', optionsGreg); // استخدام العربية (مصر)
-                document.getElementById('gregorianDate').innerText = gregStr;
-
-                // هجري
-                const hijriStr = getHijriDate(today);
-                document.getElementById('hijriDate').innerText = hijriStr;
+                document.getElementById('gregorianDate').innerText = today.toLocaleDateString('ar-EG', optionsGreg);
+                document.getElementById('hijriDate').innerText = getHijriDate(today);
             }
 
-            // ---------- 3. تحديث مواقيت الصلاة لتعز (بيانات ثابتة مع تغيير طفيف حسب التاريخ الحقيقي) ----------
+            // ---------- 3. مواقيت الصلاة (تحديث طفيف) ----------
             function updatePrayerTimes() {
-                // نستطيع جعلها ديناميكية بناءً على وقت اليوم أو ثابتة معقولة لتعز.
-                // للحصول على بيانات قريبة للواقع، نستخدم أوقاتاً افتراضية.
-                // يمكن تعديلها لاحقاً.
-                const baseTimes = {
-                    fajr: "04:58",
-                    shurooq: "06:18",
-                    dhuhr: "12:06",
-                    asr: "15:30",
-                    maghrib: "17:54",
-                    isha: "19:10"
-                };
-
-                // نضيف تأخيراً بسيطاً حسب اليوم (محاكاة لتغيير طفيف) اختياري
+                const baseTimes = { fajr: "04:58", shurooq: "06:18", dhuhr: "12:06", asr: "15:30", maghrib: "17:54", isha: "19:10" };
                 const today = new Date();
-                const dayOfMonth = today.getDate();
-                // تعديل بسيط في حدود دقيقة لإيهام التجدد (يمكن إزالته)
-                const offset = (dayOfMonth % 7) - 3; // -3 .. +3
-                function applyOffset(timeStr, offsetMin) {
-                    let [h, m] = timeStr.split(':').map(Number);
-                    let total = h * 60 + m + offsetMin;
+                const offset = (today.getDate() % 7) - 3;
+                function applyOffset(t, o) {
+                    let [h, m] = t.split(':').map(Number);
+                    let total = h * 60 + m + o;
                     if (total < 0) total += 1440;
                     if (total >= 1440) total -= 1440;
-                    h = Math.floor(total / 60);
-                    m = total % 60;
-                    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                    return `${Math.floor(total/60).toString().padStart(2,'0')}:${(total%60).toString().padStart(2,'0')}`;
                 }
-
                 document.getElementById('fajr').innerText = applyOffset(baseTimes.fajr, offset);
                 document.getElementById('shurooq').innerText = applyOffset(baseTimes.shurooq, offset);
-                document.getElementById('dhuhr').innerText = applyOffset(baseTimes.dhuhr, offset-1); // تعديل بسيط
+                document.getElementById('dhuhr').innerText = applyOffset(baseTimes.dhuhr, offset-1);
                 document.getElementById('asr').innerText = applyOffset(baseTimes.asr, offset+1);
                 document.getElementById('maghrib').innerText = applyOffset(baseTimes.maghrib, offset);
                 document.getElementById('isha').innerText = applyOffset(baseTimes.isha, offset+2);
             }
 
-            // ---------- 4. زر مشاركة التقويم (Web Share + نسخ احتياطي) ----------
+            // ---------- 4. مشاركة التقويم ----------
             function shareCalendar() {
                 const greg = document.getElementById('gregorianDate').innerText;
                 const hij = document.getElementById('hijriDate').innerText;
-                const fajr = document.getElementById('fajr').innerText;
-                const shurooq = document.getElementById('shurooq').innerText;
-                const dhuhr = document.getElementById('dhuhr').innerText;
-                const asr = document.getElementById('asr').innerText;
-                const maghrib = document.getElementById('maghrib').innerText;
-                const isha = document.getElementById('isha').innerText;
+                const times = {
+                    fajr: document.getElementById('fajr').innerText,
+                    shurooq: document.getElementById('shurooq').innerText,
+                    dhuhr: document.getElementById('dhuhr').innerText,
+                    asr: document.getElementById('asr').innerText,
+                    maghrib: document.getElementById('maghrib').innerText,
+                    isha: document.getElementById('isha').innerText
+                };
+                const shareText = `📅 مواقيت الصلاة في تعز
+${greg} | ${hij}
 
-                const shareText = `📅 مواقيت الصلاة في تعز - اليمن
-التاريخ الميلادي: ${greg}
-التاريخ الهجري: ${hij}
+الفجر: ${times.fajr}   الشروق: ${times.shurooq}
+الظهر: ${times.dhuhr}   العصر: ${times.asr}
+المغرب: ${times.maghrib}   العشاء: ${times.isha}
 
-🕌 أوقات الصلاة:
-الفجر: ${fajr}   الشروق: ${shurooq}
-الظهر: ${dhuhr}   العصر: ${asr}
-المغرب: ${maghrib}   العشاء: ${isha}
+❄️ تقويم شتاء تعز`;
 
-❄️ تقويم شتاء تعز (تساقط ثلوج رمزي)`;
-
-                if (navigator.share && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                    // مشاركة عبر Web Share (مناسب للجوال)
-                    navigator.share({
-                        title: 'مواقيت الصلاة - تعز',
-                        text: shareText,
-                    }).catch(err => {
-                        if (err.name !== 'AbortError') {
-                            fallbackCopy(shareText);
-                        }
-                    });
+                if (navigator.share) {
+                    navigator.share({ title: 'مواقيت تعز', text: shareText }).catch(() => fallbackCopy(shareText));
                 } else {
                     fallbackCopy(shareText);
                 }
             }
 
             function fallbackCopy(text) {
-                // محاولة نسخ النص إلى الحافظة
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(text).then(() => {
-                        alert('تم نسخ مواقيت الصلاة إلى الحافظة 👍');
-                    }).catch(() => {
-                        prompt('انسخ النص يدويًا:', text);
-                    });
+                if (navigator.clipboard?.writeText) {
+                    navigator.clipboard.writeText(text).then(() => alert('تم النسخ'));
                 } else {
-                    prompt('انسخ النص يدويًا:', text);
+                    prompt('انسخ النص:', text);
                 }
             }
 
             document.getElementById('shareCalendarBtn').addEventListener('click', shareCalendar);
-
-            // تهيئة البيانات
             updateDates();
             updatePrayerTimes();
+            setInterval(() => { updateDates(); updatePrayerTimes(); }, 60000);
 
-            // تحديث التاريخ كل دقيقة (للتأكد من دقة التاريخ عند بقاء الصفحة مفتوحة)
-            setInterval(() => {
-                updateDates();
-                // يمكن تحديث المواقيت أيضاً حسب اليوم
-                updatePrayerTimes();
-            }, 60000); // كل دقيقة
+            // ---------- 5. PWA: إنشاء manifest ديناميكي وأيقونات و service worker ----------
+            (function setupPWA() {
+                // إنشاء manifest blob وإدراجه
+                const manifestData = {
+                    name: "مواقيت تعز",
+                    short_name: "مواقيت تعز",
+                    description: "مواقيت الصلاة والتقويم الهجري في تعز مع تساقط الثلوج",
+                    start_url: window.location.href.split('#')[0].split('?')[0], // عنوان نظيف
+                    display: "standalone",
+                    orientation: "portrait",
+                    theme_color: "#1a2f3f",
+                    background_color: "#16222e",
+                    icons: [
+                        {
+                            src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a2f3f'/%3E%3Ctext x='50' y='75' font-size='70' text-anchor='middle' fill='%23ffffff' font-family='system-ui'%3E🌙%3C/text%3E%3C/svg%3E",
+                            sizes: "192x192",
+                            type: "image/svg+xml",
+                            purpose: "any"
+                        },
+                        {
+                            src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a2f3f'/%3E%3Ctext x='50' y='75' font-size='70' text-anchor='middle' fill='%23ffffff' font-family='system-ui'%3E🌙%3C/text%3E%3C/svg%3E",
+                            sizes: "512x512",
+                            type: "image/svg+xml",
+                            purpose: "any"
+                        }
+                    ]
+                };
 
-            // يمكن إضافة تأثير عند تغيير التاريخ منتصف الليل (ليس ضرورياً)
+                const manifestBlob = new Blob([JSON.stringify(manifestData, null, 2)], { type: 'application/json' });
+                const manifestURL = URL.createObjectURL(manifestBlob);
+                let manifestLink = document.querySelector('link[rel="manifest"]');
+                if (!manifestLink) {
+                    manifestLink = document.createElement('link');
+                    manifestLink.rel = 'manifest';
+                    document.head.appendChild(manifestLink);
+                }
+                manifestLink.href = manifestURL;
 
+                // أيقونات Apple (نفس SVG ولكن كـ apple-touch-icon)
+                const svgIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a2f3f'/%3E%3Ctext x='50' y='75' font-size='70' text-anchor='middle' fill='%23ffffff' font-family='system-ui'%3E🌙%3C/text%3E%3C/svg%3E";
+                document.getElementById('apple-touch-icon')?.setAttribute('href', svgIcon);
+                document.getElementById('favicon')?.setAttribute('href', svgIcon);
+
+                // زر التثبيت (BeforeInstallPrompt)
+                let deferredPrompt;
+                const installBtn = document.getElementById('installBtn');
+
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    deferredPrompt = e;
+                    installBtn.style.display = 'inline-flex';
+                });
+
+                installBtn.addEventListener('click', async () => {
+                    if (!deferredPrompt) return;
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log('نتيجة التثبيت:', outcome);
+                    deferredPrompt = null;
+                    installBtn.style.display = 'none';
+                });
+
+                window.addEventListener('appinstalled', () => {
+                    installBtn.style.display = 'none';
+                    console.log('تم تثبيت التطبيق');
+                });
+
+                // Service Worker بسيط للتخزين المؤقت (نقوم بتسجيله عبر Blob غير ممكن، لذا نكتبه نصاً ونحوله لملف)
+                // يجب أن يكون sw حقيقياً، ولكن يمكن إنشاء sw باستخدام blob؟ للأسف لا.
+                // بدلاً من ذلك، سننشئ service worker بسيط في ملف منفصل، لكننا في صفحة واحدة.
+                // الحل: تسجيل service worker من نفس الصفحة عبر "تخزين" الكود في cache ثم تسجيله؟ معقد.
+                // لتلبية الحد الأدنى للتثبيت، service worker ليس ضرورياً إذا كان هناك manifest.
+                // لكني سأضيف محاولة تسجيل Service Worker عبر نص مدمج (نقوم بتحميله كـ data URI للعامل) - غير مسموح.
+                // سأترك تعليقاً ونقوم بالتسجيل فقط إذا كان الموقع https ولدينا sw.js حقيقي.
+                // للتجربة المحلية، نستخدم service worker فارغ مسجل من نفس المسار.
+                // سنقوم بإنشاء service worker حقيقي عبر blob؟ لا يمكن. لذا سأضيف كوداً يحاول تسجيل sw.js
+                // إذا كان المستخدم سيستضيف الموقع على سيرفر، يمكنه وضع ملف sw.js بجانب index.html.
+                // داخل هذا الملف، سنحاول إنشاء sw باستخدام eval worker؟ لا.
+                // الحل: تضمين worker داخل html باستخدام new Worker(blob)؟ لكن هذا للتشغيل وليس للتسجيل.
+                // لذا سأكتفي بوجود manifest وزر التثبيت، لأن service worker صعب في بيئة ملف واحد.
+                // ولكن يمكننا تسجيل service worker باستخدام Worker من blob لتخزين مؤقت؟ لا، التسجيل يتطلب URL.
+                // سأضيف كوداً اختيارياً لمحاولة تسجيل sw إذا كان متاحاً، مع إنشاء استجابة مؤقتة من cache عبر js.
+
+                // محاولة تسجيل service worker من موقع (إذا وجد sw.js حقيقي)
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(regs => {
+                        if (regs.length === 0) {
+                            // إنشاء service worker ديناميكي باستخدام blob URL غير ممكن، لكن يمكننا تسجيل
+                            // ملف sw.js حقيقي. إذا لم يكن موجوداً، سنقوم بإنشائه عبر cache API؟
+                            // لتبسيط، سنعرض فقط رسالة للمطور.
+                            console.log('يمكن إضافة ملف sw.js حقيقي لتفعيل PWA كاملاً');
+                        }
+                    });
+                }
+
+                // تنظيف عنوان blob بعد تحميله
+                window.addEventListener('load', () => {
+                    setTimeout(() => URL.revokeObjectURL(manifestURL), 1000);
+                });
+            })();
         })();
     </script>
+    <!-- سكربت منفصل لـ Service Worker (اختياري) - إذا وضعت ملف sw.js حقيقياً، قم بإلغاء التعليق -->
+    <!-- <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(console.warn);
+        }
+    </script> -->
 </body>
-</html>
+                </html>
