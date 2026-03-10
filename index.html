@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المصحف المحمول - إهداء من عمر منير</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="المصحف المحمول">
+    
+    <!-- Web Manifest (Inline) -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogInRhZmlyIEFscXVyYW4iLAogICJzaG9ydF9uYW1lIjogIsmEaaa1Y2itIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZjE3MmEiLAogICJ0aGVtZV9jb2xvciI6ICIjMGYxNzJhIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMjg4NS8yODg1Njg3LnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -20,7 +30,6 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 15px;
         }
-        /* تصغير عناصر القائمة قليلاً كما طلبت */
         .surah-item {
             padding: 8px 12px;
             font-size: 0.9rem;
@@ -30,7 +39,6 @@
             background: rgba(255, 255, 255, 0.15) !important;
             border-right: 3px solid #fbbf24;
         }
-        /* تأثير الزهور المتساقطة */
         .flower {
             position: fixed;
             top: -10%;
@@ -52,7 +60,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Modal Style */
         #welcome-modal {
             background: rgba(0,0,0,0.8);
             backdrop-filter: blur(5px);
@@ -61,7 +68,7 @@
 </head>
 <body class="text-white p-4 pb-24">
 
-    <!-- رسالة الترحيب (تظهر مرة واحدة) -->
+    <!-- رسالة الترحيب -->
     <div id="welcome-modal" class="fixed inset-0 z-[200] flex items-center justify-center hidden p-6 text-center">
         <div class="glass-card p-8 max-w-sm w-full border-yellow-500/50 border-2">
             <div class="text-4xl mb-4">🌸</div>
@@ -127,10 +134,27 @@
     </div>
 
     <script>
+        // Service Worker Registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    const CACHE_NAME = 'quran-pwa-v1';
+                    self.addEventListener('install', (event) => {
+                        event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['/'])));
+                    });
+                    self.addEventListener('fetch', (event) => {
+                        event.respondWith(caches.match(event.request).then((res) => res || fetch(event.request)));
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(err => console.log('SW failed', err));
+            });
+        }
+
         const CACHE_NAME = 'quran-full-cache-v1';
         const BASE_URL = "https://server7.mp3quran.net/basit/";
         
-        // توليد قائمة الـ 114 سورة برمجياً
         const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
         const surahs = surahNames.map((name, index) => ({
@@ -148,7 +172,6 @@
         const surahListEl = document.getElementById('surah-list');
 
         function init() {
-            // Check for first time visitor
             if (!localStorage.getItem('visited')) {
                 document.getElementById('welcome-modal').classList.remove('hidden');
             }
@@ -170,7 +193,6 @@
             badge.classList.toggle('hidden', navigator.onLine);
         }
 
-        // تساقط الزهور
         function startFlowerRain() {
             const flowers = ['🌸', '🌺', '🌼', '🌷'];
             setInterval(() => {
