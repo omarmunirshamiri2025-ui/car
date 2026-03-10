@@ -154,9 +154,63 @@
       .date-compact { flex-direction: column; align-items: center; gap: 10px; }
       .share-btn, #installBtn { font-size: 1.1rem; padding: 0.7rem 1.5rem; }
     }
+    /* شاشة التحميل (Splash Screen) */
+    #splash-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(145deg, #1a2f3f, #0f1c26);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease-out, visibility 0.5s;
+      pointer-events: none;
+    }
+    #splash-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .splash-content {
+      text-align: center;
+      color: white;
+    }
+    .splash-icon {
+      font-size: 5rem;
+      margin-bottom: 1rem;
+      animation: pulse 1.5s infinite;
+    }
+    .splash-title {
+      font-size: 2rem;
+      font-weight: 300;
+      margin-bottom: 2rem;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px #8fcbff;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255,255,255,0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0% { opacity: 0.7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0.7; transform: scale(1); } }
   </style>
 </head>
 <body>
+
+  <!-- شاشة التحميل -->
+  <div id="splash-screen">
+    <div class="splash-content">
+      <div class="splash-icon">🌙</div>
+      <div class="splash-title">مواقيت تعز</div>
+      <div class="spinner"></div>
+    </div>
+  </div>
 
   <!-- لوحة الثلج -->
   <canvas id="snow-container"></canvas>
@@ -194,6 +248,20 @@
 
   <script>
     (function() {
+      // ---------- إخفاء شاشة التحميل بعد تحميل الصفحة ----------
+      const splash = document.getElementById('splash-screen');
+      function hideSplash() {
+        splash.classList.add('hidden');
+        // يمكن إزالة العنصر بالكامل بعد الانتهاء من التأثير
+        setTimeout(() => {
+          if (splash.parentNode) splash.style.display = 'none';
+        }, 600);
+      }
+      // ننتظر حتى يتم تحميل كل المحتوى (بما في ذلك الصور والخطوط)
+      window.addEventListener('load', hideSplash);
+      // احتياطي: في حال حدث خطأ أو كان التحميل سريعاً جداً، نضمن إخفاءها بعد 3 ثوانٍ
+      setTimeout(hideSplash, 3000);
+
       // ---------- 1. تساقط الثلوج (canvas) ----------
       const canvas = document.getElementById('snow-container');
       const ctx = canvas.getContext('2d');
@@ -323,7 +391,7 @@
       updatePrayerTimes();
       setInterval(() => { updateDates(); updatePrayerTimes(); }, 60000);
 
-      // ---------- 5. PWA: manifest ديناميكي + زر التثبيت + service worker ----------
+      // ---------- 5. PWA: manifest ديناميكي + زر التثبيت ----------
       // إنشاء manifest وإضافته للصفحة
       const manifestData = {
         name: "مواقيت تعز",
@@ -366,33 +434,12 @@
       });
       window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
 
-      // تسجيل Service Worker (باستخدام Blob URL)
-      if ('serviceWorker' in navigator) {
-        // كود الـ service worker كسلسلة نصية
-        const swCode = `
-          const CACHE_NAME = 'taiz-prayer-v1';
-          const urlsToCache = ['/', '/index.html'];
-          self.addEventListener('install', e => {
-            e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
-          });
-          self.addEventListener('fetch', e => {
-            e.respondWith(caches.match(e.request).then(response => response || fetch(e.request)));
-          });
-        `;
-        const swBlob = new Blob([swCode], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(swBlob);
-        navigator.serviceWorker.register(swUrl).then(reg => {
-          console.log('✅ Service worker registered', reg);
-          URL.revokeObjectURL(swUrl); // تنظيف
-        }).catch(err => {
-          console.warn('❌ Service worker registration failed:', err);
-          URL.revokeObjectURL(swUrl);
-        });
-      }
-
       // تنظيف عنوان manifest بعد فترة
       window.addEventListener('load', () => setTimeout(() => URL.revokeObjectURL(manifestUrl), 2000));
     })();
   </script>
+  <!-- ملاحظة: لإضافة Service Worker حقيقي (للتخزين المؤقت والعمل دون اتصال)،
+       قم بإنشاء ملف sw.js في نفس المسار بالمحتوى المناسب، ثم أضف الكود التالي:
+       if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); } -->
 </body>
-      </html>
+        </html>
