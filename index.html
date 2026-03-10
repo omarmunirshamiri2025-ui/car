@@ -3,221 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مواقيت الصلاة في تعز - النسخة المحدثة</title>
+    <title>مواقيت الصلاة - تعز</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
-        body { 
-            font-family: 'Tajawal', sans-serif; 
-            background-color: #020617; 
-            color: white; 
+        body {
+            font-family: 'Tajawal', sans-serif;
             margin: 0;
             overflow-x: hidden;
-        }
-        .font-mono { font-family: 'Courier New', Courier, monospace; }
-
-        /* أنيميشن الطيور */
-        .bird {
-            position: absolute;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7s-4 4-10 4S2 7 2 7"/><path d="M2 7s4 4 10 4 10-4 10-4"/></svg>');
-            background-size: contain;
-            background-repeat: no-repeat;
-            width: 30px;
-            height: 30px;
-            z-index: 0;
-            pointer-events: none;
+            background: #0f172a;
+            color: white;
         }
 
-        @keyframes fly {
-            0% { transform: translate(-10vw, 20vh) rotate(5deg); }
-            25% { transform: translate(30vw, 10vh) rotate(-5deg); }
-            50% { transform: translate(60vw, 25vh) rotate(5deg); }
-            75% { transform: translate(90vw, 15vh) rotate(-5deg); }
-            100% { transform: translate(110vw, 20vh) rotate(5deg); }
-        }
-
-        .bird-1 { animation: fly 20s linear infinite; top: 10%; }
-        .bird-2 { animation: fly 25s linear infinite reverse; top: 35%; animation-delay: 5s; }
-        .bird-3 { animation: fly 18s linear infinite; top: 65%; animation-delay: 2s; }
-        
-        /* ترفرف الجناح */
-        @keyframes flap {
-            0%, 100% { transform: scaleY(1); }
-            50% { transform: scaleY(0.5); }
-        }
-        .bird::after {
-            content: '';
-            display: block;
+        /* Live Background with twinkling stars */
+        .live-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            animation: flap 0.5s ease-in-out infinite;
+            z-index: -1;
+            background: linear-gradient(to bottom, #1e293b, #0f172a);
+            overflow: hidden;
         }
 
-        /* تحسين مظهر البطاقات */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1.5rem;
+        }
+
+        .active-prayer {
+            background: rgba(59, 130, 246, 0.5);
+            border-color: #60a5fa;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .prayer-card {
+            transition: all 0.3s ease;
+        }
+
+        .share-btn {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        #timer-box {
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
         }
     </style>
 </head>
 <body>
-    <!-- عناصر الخلفية (الطيور) -->
-    <div class="bird bird-1"></div>
-    <div class="bird bird-2"></div>
-    <div class="bird bird-3"></div>
 
-    <div id="root" class="relative z-10"></div>
+    <div class="live-bg" id="star-container"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { MapPin, RefreshCw, Moon, Sun, Calendar, Clock } = lucide;
+    <div class="min-h-screen flex flex-col items-center p-4 md:p-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">مواقيت الصلاة في تعز</h1>
+            <div class="flex flex-col gap-1">
+                <p id="current-date-hijri" class="text-yellow-400 text-xl font-bold"></p>
+                <p id="current-date-gregorian" class="text-blue-300 text-md opacity-80"></p>
+            </div>
+        </header>
 
-        const TAIZ_COORDS = { lat: 13.5795, lng: 44.0108 };
+        <!-- Next Prayer Timer -->
+        <div class="glass w-full max-w-2xl p-8 text-center mb-8 prayer-card">
+            <h2 class="text-xl mb-2 text-gray-300">الصلاة القادمة: <span id="next-prayer-name" class="text-white font-bold">--</span></h2>
+            <div id="timer-box" class="text-5xl md:text-7xl font-bold font-mono tracking-tighter text-blue-400 my-4">00:00:00</div>
+            <p class="text-sm text-gray-400 italic">يتبقى على رفع الأذان</p>
+        </div>
 
-        function App() {
-            const [prayerTimes, setPrayerTimes] = useState(null);
-            const [nextPrayer, setNextPrayer] = useState(null);
-            const [timeLeft, setTimeLeft] = useState("00:00:00");
-            const [currentTime, setCurrentTime] = useState(new Date());
-            const [hijriDate, setHijriDate] = useState("");
-            const [gregorianDate, setGregorianDate] = useState("");
-            const [loading, setLoading] = useState(true);
+        <!-- Prayer Times Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full max-w-5xl mb-8" id="prayer-list">
+            <!-- Cards will be injected by JS -->
+        </div>
 
-            const prayerNames = {
-                Fajr: "الفجر",
-                Sunrise: "الشروق",
-                Dhuhr: "الظهر",
-                Asr: "العصر",
-                Maghrib: "المغرب",
-                Isha: "العشاء"
-            };
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap justify-center gap-4 w-full max-w-2xl">
+            <button onclick="shareTimes()" class="share-btn px-8 py-3 rounded-full font-bold flex items-center gap-2 hover:opacity-90 transition shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+                </svg>
+                مشاركة المواقيت
+            </button>
+            <button onclick="generateMonthly()" class="bg-white/10 hover:bg-white/20 px-8 py-3 rounded-full font-bold border border-white/20 transition backdrop-blur-sm">
+                تحميل تقويم الشهر
+            </button>
+        </div>
 
-            useEffect(() => {
-                fetchPrayerTimes();
-                const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-                return () => clearInterval(timer);
-            }, []);
+        <footer class="mt-auto pt-12 pb-4 text-gray-500 text-sm">
+            &copy; 2024 مواقيت الصلاة - تعز، الجمهورية اليمنية
+        </footer>
+    </div>
 
-            useEffect(() => {
-                if (prayerTimes) calculateNextPrayer();
-            }, [currentTime, prayerTimes]);
+    <!-- Notification Container -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 transition-opacity pointer-events-none z-50">
+        تم نسخ الرابط للمشاركة!
+    </div>
 
-            const fetchPrayerTimes = async () => {
-                setLoading(true);
-                try {
-                    // طريقة 1 (كراتشي) - الأنسب لليمن
-                    const res = await fetch(`https://api.aladhan.com/v1/timings/${Math.floor(Date.now() / 1000)}?latitude=${TAIZ_COORDS.lat}&longitude=${TAIZ_COORDS.lng}&method=1`);
-                    const data = await res.json();
-                    
-                    setPrayerTimes(data.data.timings);
-                    
-                    // استخراج التاريخ الهجري والميلادي من الاستجابة
-                    const hijri = data.data.date.hijri;
-                    const greg = data.data.date.gregorian;
-                    
-                    setHijriDate(`${hijri.day} ${hijri.month.ar} ${hijri.year} هـ`);
-                    setGregorianDate(`${greg.day} ${greg.month.en} ${greg.year} م`);
-                    
-                } catch (err) {
-                    console.error("Fetch error", err);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            const calculateNextPrayer = () => {
-                const now = currentTime;
-                const list = Object.keys(prayerNames).map(key => {
-                    const [h, m] = prayerTimes[key].split(':');
-                    const d = new Date();
-                    d.setHours(parseInt(h), parseInt(m), 0);
-                    return { name: key, date: d, timeStr: prayerTimes[key] };
-                });
-
-                let next = list.find(p => p.date > now);
-                if (!next) {
-                    next = { ...list[0], date: new Date(list[0].date.getTime() + 86400000) };
-                }
-
-                setNextPrayer(next);
-                const diff = next.date - now;
-                const h = Math.floor(diff / 3600000);
-                const m = Math.floor((diff % 3600000) / 60000);
-                const s = Math.floor((diff % 60000) / 1000);
-                setTimeLeft(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
-            };
-
-            if (loading) return (
-                <div className="flex items-center justify-center h-screen">
-                    <div className="text-emerald-500 animate-pulse font-bold">جاري ضبط التوقيت والتواريخ لتعز...</div>
-                </div>
-            );
-
-            return (
-                <div className="max-w-md mx-auto p-6 min-h-screen">
-                    <div className="flex justify-between items-center mb-8">
-                        <div className="flex items-center gap-2 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20 backdrop-blur-sm">
-                            <i data-lucide="map-pin" className="w-4 h-4 text-emerald-400"></i>
-                            <span className="text-xs font-bold text-emerald-100">تعز، اليمن</span>
-                        </div>
-                        <button onClick={fetchPrayerTimes} className="p-2 hover:rotate-180 transition-all duration-500 bg-white/5 rounded-full">
-                            <i data-lucide="refresh-cw" className="w-5 h-5 text-slate-400"></i>
-                        </button>
-                    </div>
-
-                    <div className="text-center mb-8">
-                        <p className="text-slate-400 text-xs mb-2">الوقت المتبقي لـ {nextPrayer ? prayerNames[nextPrayer.name] : '...'}</p>
-                        <h1 className="text-7xl font-black font-mono tracking-tighter drop-shadow-lg mb-4">{timeLeft}</h1>
-                        
-                        {/* عرض التاريخ الهجري والميلادي */}
-                        <div className="flex flex-col gap-1 items-center justify-center bg-white/5 py-3 rounded-2xl border border-white/5 backdrop-blur-md">
-                            <div className="flex items-center gap-2 text-emerald-400 font-bold tracking-wide">
-                                <i data-lucide="calendar" className="w-4 h-4"></i>
-                                <span>{hijriDate}</span>
-                            </div>
-                            <div className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">
-                                {gregorianDate}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="grid gap-3">
-                        {Object.keys(prayerNames).map(key => {
-                            const isNext = nextPrayer?.name === key;
-                            return (
-                                <div key={key} className={`flex items-center justify-between p-5 rounded-3xl border transition-all backdrop-blur-sm ${isNext ? 'bg-emerald-600/90 border-emerald-400 shadow-xl scale-[1.02]' : 'glass-card'}`}>
-                                    <div className="flex items-center gap-4">
-                                        <div className={`p-3 rounded-2xl ${isNext ? 'bg-white/20' : 'bg-slate-800'}`}>
-                                            <i data-lucide={key === 'Sunrise' ? 'sun' : (key === 'Fajr' || key === 'Isha' ? 'moon' : 'sun')} className="w-6 h-6"></i>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-lg font-bold">{prayerNames[key]}</span>
-                                            <span className={`text-[9px] uppercase tracking-widest ${isNext ? 'text-emerald-100' : 'text-slate-500'}`}>{key}</span>
-                                        </div>
-                                    </div>
-                                    <span className={`text-2xl font-black font-mono ${isNext ? 'text-white' : 'text-emerald-500'}`}>{prayerTimes[key]}</span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    
-                    <footer className="mt-8 p-4 bg-blue-500/5 border border-white/5 rounded-2xl text-[10px] text-slate-500 text-center leading-relaxed">
-                        <p>تم تحديث التقويم لليوم: {gregorianDate}</p>
-                        <p className="mt-1">دقة عالية بناءً على إحداثيات مدينة تعز</p>
-                    </footer>
-                </div>
-            );
+    <script>
+        // 1. Create Animated Background Stars
+        function createStars() {
+            const container = document.getElementById('star-container');
+            const count = 150;
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 3;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                container.appendChild(star);
+            }
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-        // إعادة تهيئة الأيقونات
-        setTimeout(() => lucide.createIcons(), 500);
+        // 2. Prayer Names and Icons
+        const prayerNames = [
+            { id: 'fajr', ar: 'الفجر', icon: '🌅' },
+            { id: 'sunrise', ar: 'الشروق', icon: '☀️' },
+            { id: 'dhuhr', ar: 'الظهر', icon: '☀️' },
+            { id: 'asr', ar: 'العصر', icon: '⛅' },
+            { id: 'maghrib', ar: 'المغرب', icon: '🌇' },
+            { id: 'isha', ar: 'العشاء', icon: '🌙' }
+        ];
+
+        // 3. Get Mock Times for Taiz (In real app, fetch from an API)
+        function getTaizPrayerTimes(date = new Date()) {
+            return {
+                fajr: "04:55",
+                sunrise: "06:10",
+                dhuhr: "12:15",
+                asr: "15:35",
+                maghrib: "18:18",
+                isha: "19:25"
+            };
+        }
+
+        // 4. Update the UI with dates and times
+        function updateUI() {
+            const times = getTaizPrayerTimes();
+            const prayerList = document.getElementById('prayer-list');
+            prayerList.innerHTML = '';
+            
+            const now = new Date();
+            const currentTimeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+
+            // Set Dates
+            const gregOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date-gregorian').innerText = now.toLocaleDateString('ar-YE', gregOptions);
+
+            const hijriOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+            const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', hijriOptions).format(now);
+            document.getElementById('current-date-hijri').innerText = hijriDate;
+
+            let nextFound = false;
+            let nextName = "الفجر (غداً)";
+            let nextTimeStr = times.fajr;
+
+            prayerNames.forEach(p => {
+                const time = times[p.id];
+                const isPast = time < currentTimeStr;
+                const isActive = !nextFound && !isPast;
+
+                if (isActive) {
+                    nextFound = true;
+                    nextName = p.ar;
+                    nextTimeStr = time;
+                }
+
+                const card = document.createElement('div');
+                card.className = `glass p-4 text-center prayer-card ${isActive ? 'active-prayer' : 'opacity-70'}`;
+                card.innerHTML = `
+                    <div class="text-2xl mb-1">${p.icon}</div>
+                    <div class="text-gray-300 text-sm mb-1">${p.ar}</div>
+                    <div class="text-xl font-bold">${convertTo12H(time)}</div>
+                `;
+                prayerList.appendChild(card);
+            });
+
+            document.getElementById('next-prayer-name').innerText = nextName;
+            startTimer(nextTimeStr);
+        }
+
+        function convertTo12H(time) {
+            let [h, m] = time.split(':');
+            const ampm = h >= 12 ? 'م' : 'ص';
+            h = h % 12 || 12;
+            return `${h}:${m} ${ampm}`;
+        }
+
+        function startTimer(targetTimeStr) {
+            const timerEl = document.getElementById('timer-box');
+            
+            function tick() {
+                const now = new Date();
+                const [h, m] = targetTimeStr.split(':');
+                let target = new Date();
+                target.setHours(h, m, 0);
+
+                if (target < now) {
+                    target.setDate(target.getDate() + 1);
+                }
+
+                const diff = target - now;
+                const hours = Math.floor(diff / 3600000);
+                const minutes = Math.floor((diff % 3600000) / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+
+                timerEl.innerText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+
+            if (window.timerInterval) clearInterval(window.timerInterval);
+            window.timerInterval = setInterval(tick, 1000);
+            tick();
+        }
+
+        function shareTimes() {
+            const hijri = document.getElementById('current-date-hijri').innerText;
+            const text = `مواقيت الصلاة في مدينة تعز لليوم (${hijri}): \n` + 
+                         Object.entries(getTaizPrayerTimes()).map(([k,v]) => `${k}: ${v}`).join('\n');
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'مواقيت الصلاة - تعز',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                const dummy = document.createElement('textarea');
+                document.body.appendChild(dummy);
+                dummy.value = text + "\n" + window.location.href;
+                dummy.select();
+                document.execCommand('copy');
+                document.body.removeChild(dummy);
+                
+                const toast = document.getElementById('toast');
+                toast.style.opacity = '1';
+                setTimeout(() => toast.style.opacity = '0', 3000);
+            }
+        }
+
+        function generateMonthly() {
+            alert("هذه الميزة ستتوفر قريباً لتحميل جدول كامل لشهر رمضان والأشهر الهجرية لمدينة تعز.");
+        }
+
+        // Initialize
+        createStars();
+        updateUI();
+        setInterval(updateUI, 60000); // Refresh UI data every minute
     </script>
 </body>
 </html>
