@@ -9,13 +9,12 @@
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="المصحف المحمول">
-    
-    <!-- Web Manifest (Inline) -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogInRhZmlyIEFscXVyYW4iLAogICJzaG9ydF9uYW1lIjogIsmEaaa1Y2itIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZjE3MmEiLAogICJ0aGVtZV9jb2xvciI6ICIjMGYxNzJhIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMjg4NS8yODg1Njg3LnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+    <meta name="apple-mobile-web-app-title" content="المصحف">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2885/2885687.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Tajawal', sans-serif;
@@ -30,10 +29,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 15px;
         }
-        .surah-item {
-            padding: 8px 12px;
-            font-size: 0.9rem;
-        }
+        .surah-item { padding: 8px 12px; font-size: 0.9rem; }
         .surah-item:hover { background: rgba(255, 255, 255, 0.1); }
         .active-surah {
             background: rgba(255, 255, 255, 0.15) !important;
@@ -47,28 +43,21 @@
             cursor: default;
             animation: fall linear forwards;
         }
-        @keyframes fall {
-            to { transform: translateY(110vh) rotate(360deg); }
-        }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
         .loading-spinner {
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top: 2px solid #fff;
-            width: 14px;
-            height: 14px;
+            width: 14px; height: 14px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        #welcome-modal {
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-        }
+        #welcome-modal { background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
     </style>
 </head>
 <body class="text-white p-4 pb-24">
 
-    <!-- رسالة الترحيب -->
+    <!-- Welcome Modal -->
     <div id="welcome-modal" class="fixed inset-0 z-[200] flex items-center justify-center hidden p-6 text-center">
         <div class="glass-card p-8 max-w-sm w-full border-yellow-500/50 border-2">
             <div class="text-4xl mb-4">🌸</div>
@@ -113,20 +102,16 @@
             </div>
         </div>
 
-        <!-- قسم الدعاء -->
         <div class="glass-card p-4 mb-4 border-l-4 border-yellow-500 italic text-sm opacity-90 leading-relaxed">
             <span class="text-yellow-400 font-bold">دعاء:</span>
-            "اللهم اجعل القرآن الكريم ربيع قلوبنا، ونور صدورنا، وجلاء أحزاننا، وذهاب همومنا وغمومنا، وذكرنا منه ما نسينا، وعلمنا منه ما جهلنا."
+            "اللهم اجعل القرآن الكريم ربيع قلوبنا، ونور صدورنا، وجلاء أحزاننا، وذهاب همومنا وغمومنا."
         </div>
 
         <div class="mb-4">
             <input type="text" id="search-input" placeholder="ابحث عن سورة..." class="w-full p-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500/50">
         </div>
 
-        <!-- Surah List -->
-        <div id="surah-list" class="space-y-1.5 max-h-[50vh] overflow-y-auto pr-1">
-            <!-- سيتم تعبئة الـ 114 سورة هنا -->
-        </div>
+        <div id="surah-list" class="space-y-1.5 max-h-[50vh] overflow-y-auto pr-1"></div>
 
         <footer class="mt-8 text-center text-[10px] opacity-40">
             تم التطوير بواسطة عمر منير &copy; 2024
@@ -134,34 +119,45 @@
     </div>
 
     <script>
-        // Service Worker Registration for PWA
+        // --- PWA CONFIGURATION ---
+        const manifest = {
+            "name": "المصحف المحمول",
+            "short_name": "المصحف",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#0f172a",
+            "theme_color": "#0f172a",
+            "icons": [{
+                "src": "https://cdn-icons-png.flaticon.com/512/2885/2885687.png",
+                "sizes": "512x512",
+                "type": "image/png",
+                "purpose": "any maskable"
+            }]
+        };
+        const manifestStr = JSON.stringify(manifest);
+        const manifestBlob = new Blob([manifestStr], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = manifestURL;
+        document.head.appendChild(link);
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const swCode = `
-                    const CACHE_NAME = 'quran-pwa-v1';
-                    self.addEventListener('install', (event) => {
-                        event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['/'])));
-                    });
-                    self.addEventListener('fetch', (event) => {
-                        event.respondWith(caches.match(event.request).then((res) => res || fetch(event.request)));
-                    });
+                    self.addEventListener('install', (e) => self.skipWaiting());
+                    self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
                 `;
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                const swUrl = URL.createObjectURL(blob);
-                navigator.serviceWorker.register(swUrl).catch(err => console.log('SW failed', err));
+                const blob = new Blob([swCode], {type: 'text/javascript'});
+                navigator.serviceWorker.register(URL.createObjectURL(blob));
             });
         }
 
-        const CACHE_NAME = 'quran-full-cache-v1';
+        // --- APP LOGIC ---
+        const CACHE_NAME = 'quran-cache-v2';
         const BASE_URL = "https://server7.mp3quran.net/basit/";
-        
         const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
-
-        const surahs = surahNames.map((name, index) => ({
-            id: index + 1,
-            name: name,
-            file: (index + 1).toString().padStart(3, '0') + ".mp3"
-        }));
+        const surahs = surahNames.map((name, index) => ({ id: index + 1, name, file: (index + 1).toString().padStart(3, '0') + ".mp3" }));
 
         let currentIndex = -1;
         const audio = document.getElementById('main-audio');
@@ -172,10 +168,7 @@
         const surahListEl = document.getElementById('surah-list');
 
         function init() {
-            if (!localStorage.getItem('visited')) {
-                document.getElementById('welcome-modal').classList.remove('hidden');
-            }
-            
+            if (!localStorage.getItem('visited')) document.getElementById('welcome-modal').classList.remove('hidden');
             window.addEventListener('online', updateStatus);
             window.addEventListener('offline', updateStatus);
             updateStatus();
@@ -183,15 +176,8 @@
             startFlowerRain();
         }
 
-        function closeWelcome() {
-            localStorage.setItem('visited', 'true');
-            document.getElementById('welcome-modal').classList.add('hidden');
-        }
-
-        function updateStatus() {
-            const badge = document.getElementById('offline-badge');
-            badge.classList.toggle('hidden', navigator.onLine);
-        }
+        function closeWelcome() { localStorage.setItem('visited', 'true'); document.getElementById('welcome-modal').classList.add('hidden'); }
+        function updateStatus() { document.getElementById('offline-badge').classList.toggle('hidden', navigator.onLine); }
 
         function startFlowerRain() {
             const flowers = ['🌸', '🌺', '🌼', '🌷'];
@@ -201,18 +187,13 @@
                 f.innerText = flowers[Math.floor(Math.random() * flowers.length)];
                 f.style.left = Math.random() * 100 + 'vw';
                 f.style.fontSize = (Math.random() * 10 + 10) + 'px';
-                f.style.duration = (Math.random() * 3 + 4) + 's';
-                f.style.opacity = Math.random() * 0.5 + 0.3;
-                f.style.animationDuration = f.style.duration;
+                f.style.animationDuration = (Math.random() * 3 + 4) + 's';
                 document.body.appendChild(f);
                 setTimeout(() => f.remove(), 7000);
-            }, 600);
+            }, 800);
         }
 
-        async function isCached(url) {
-            const cache = await caches.open(CACHE_NAME);
-            return !!(await cache.match(url));
-        }
+        async function isCached(url) { const cache = await caches.open(CACHE_NAME); return !!(await cache.match(url)); }
 
         async function downloadToCache(url, id) {
             const btn = document.getElementById(`dl-${id}`);
@@ -221,32 +202,25 @@
                 const cache = await caches.open(CACHE_NAME);
                 await cache.add(url);
                 renderSurahs(surahs);
-            } catch (error) {
-                btn.innerHTML = '⚠️';
-            }
+            } catch (e) { btn.innerHTML = '⚠️'; }
         }
 
         async function renderSurahs(data) {
             surahListEl.innerHTML = '';
-            for (let i = 0; i < data.length; i++) {
-                const s = data[i];
+            for (const s of data) {
                 const url = BASE_URL + s.file;
                 const cached = await isCached(url);
-                
                 const item = document.createElement('div');
                 item.className = `surah-item glass-card flex items-center justify-between cursor-pointer transition-all ${currentIndex === (s.id - 1) ? 'active-surah' : ''}`;
                 item.onclick = () => loadSurah(s.id - 1);
-                
                 item.innerHTML = `
                     <div class="flex items-center gap-2">
                         <span class="text-[10px] opacity-40 font-mono w-6 text-center">${s.id}</span>
                         <span class="font-bold">${s.name}</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        ${cached ? 
-                            '<span class="text-green-400 text-[9px] bg-green-500/10 px-1.5 py-0.5 rounded">محفوظة</span>' : 
-                            `<button id="dl-${s.id}" onclick="event.stopPropagation(); downloadToCache('${url}', ${s.id})" class="text-[10px] text-yellow-500 border border-yellow-500/30 px-2 py-0.5 rounded hover:bg-yellow-500 hover:text-black">حفظ</button>`
-                        }
+                        ${cached ? '<span class="text-green-400 text-[9px] bg-green-500/10 px-1.5 py-0.5 rounded">محفوظة</span>' : 
+                        `<button id="dl-${s.id}" onclick="event.stopPropagation(); downloadToCache('${url}', ${s.id})" class="text-[10px] text-yellow-500 border border-yellow-500/30 px-2 py-0.5 rounded">حفظ</button>`}
                     </div>
                 `;
                 surahListEl.appendChild(item);
@@ -255,9 +229,8 @@
 
         function loadSurah(index) {
             currentIndex = index;
-            const surah = surahs[index];
-            audio.src = BASE_URL + surah.file;
-            document.getElementById('current-surah-name').innerText = "سورة " + surah.name;
+            audio.src = BASE_URL + surahs[index].file;
+            document.getElementById('current-surah-name').innerText = "سورة " + surahs[index].name;
             audio.play();
             updatePlayIcon(true);
             renderSurahs(surahs);
@@ -265,8 +238,7 @@
 
         function togglePlay() {
             if (currentIndex === -1) return loadSurah(0);
-            if (audio.paused) { audio.play(); updatePlayIcon(true); }
-            else { audio.pause(); updatePlayIcon(false); }
+            audio.paused ? (audio.play(), updatePlayIcon(true)) : (audio.pause(), updatePlayIcon(false));
         }
 
         function updatePlayIcon(playing) {
@@ -277,24 +249,17 @@
         function prevSurah() { if (currentIndex > 0) loadSurah(currentIndex - 1); }
 
         audio.ontimeupdate = () => {
-            const p = (audio.currentTime / audio.duration) * 100;
-            progressBar.value = p || 0;
+            progressBar.value = (audio.currentTime / audio.duration) * 100 || 0;
             currentTimeEl.innerText = formatTime(audio.currentTime);
             durationTimeEl.innerText = formatTime(audio.duration);
         };
-
         progressBar.oninput = () => audio.currentTime = (progressBar.value * audio.duration) / 100;
         audio.onended = () => nextSurah();
-
-        function formatTime(s) {
-            if (isNaN(s)) return "00:00";
-            return Math.floor(s/60).toString().padStart(2,'0') + ":" + Math.floor(s%60).toString().padStart(2,'0');
-        }
+        function formatTime(s) { return isNaN(s) ? "00:00" : Math.floor(s/60).toString().padStart(2,'0') + ":" + Math.floor(s%60).toString().padStart(2,'0'); }
 
         document.getElementById('search-input').oninput = (e) => {
-            const term = e.target.value.toLowerCase();
-            const filtered = surahs.filter(s => s.name.includes(term));
-            renderSurahs(filtered);
+            const term = e.target.value;
+            renderSurahs(surahs.filter(s => s.name.includes(term)));
         };
 
         init();
