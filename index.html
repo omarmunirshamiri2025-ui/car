@@ -3,278 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>القرآن الكريم - المصحف الرقمي</title>
-    <!-- Manifest for PWA -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogInF1cmFuIEFwcCIsCiAgInNob3J0X25hbWUiIjogInF1cmFuIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwNjRlM2IiLAogICJ0aGVtZV9jb2xvciI6ICIjMTM0ZTRhIgp9">
+    <title>دعاء المستجاب</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap');
-
         body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* خلفية إسلامية هادئة */
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                        url('https://images.unsplash.com/photo-1564121211835-e88c852648a2?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
             font-family: 'Amiri', serif;
-            background: linear-gradient(135deg, #0f172a 0%, #064e3b 50%, #065f46 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
-            color: #fef3c7;
+            color: white;
+            overflow: hidden;
         }
 
-        /* Flower animation styles */
-        .flower {
-            position: absolute;
-            top: -50px;
-            pointer-events: none;
-            user-select: none;
-            z-index: 1;
-            animation: fall linear forwards;
+        .dua-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            max-width: 90%;
+            width: 500px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 2s ease-out;
         }
 
-        @keyframes fall {
-            to {
-                transform: translateY(110vh) rotate(360deg);
-            }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.07);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 2rem;
+        .dua-text {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 2rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: #f3f4f6;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .quran-text {
-            font-family: 'Amiri', serif;
-            line-height: 2.2;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        .install-btn {
+            background-color: #065f46;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: none; /* يظهر فقط عند توفر ميزة التثبيت */
+            margin-top: 1rem;
         }
 
-        .active-ayah {
-            color: #fbbf24;
-            background: rgba(251, 191, 36, 0.1);
-            border-radius: 8px;
-            padding: 4px 8px;
-            transition: all 0.3s ease;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.2);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #059669;
-            border-radius: 10px;
+        .install-btn:hover {
+            background-color: #047857;
+            transform: scale(1.05);
         }
     </style>
 </head>
-<body class="p-4 md:p-8 relative">
+<body>
 
-    <!-- Flowers Container -->
-    <div id="flower-container" class="fixed inset-0 pointer-events-none"></div>
-
-    <div class="max-w-4xl mx-auto relative z-10">
-        <!-- Header -->
-        <header class="text-center mb-10">
-            <h1 class="text-5xl font-bold text-amber-400 mb-2" style="font-family: 'Aref Ruqaa', serif;">القرآن الكريم</h1>
-            <p class="text-emerald-200">ورتل القرآن ترتيلاً</p>
-        </header>
-
-        <!-- Selection Panel -->
-        <div class="glass-panel p-6 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div class="w-full md:w-1/2">
-                <label class="block text-sm mb-2 text-emerald-300">اختر السورة:</label>
-                <select id="surahSelect" class="w-full bg-slate-800 border border-emerald-500/30 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <option value="" disabled selected>جاري تحميل السور...</option>
-                </select>
-            </div>
-            <div class="flex gap-4">
-                <button id="playBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-xl transition-all shadow-lg font-bold flex items-center gap-2">
-                    <span>تشغيل</span>
-                </button>
-            </div>
+    <div class="dua-card">
+        <div class="mb-4">
+            <svg class="w-12 h-12 mx-auto text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
+            </svg>
         </div>
-
-        <!-- Display Area -->
-        <div class="glass-panel p-8 min-h-[400px] flex flex-col items-center justify-center text-center">
-            <div id="loadingOverlay" class="hidden">جاري التحميل...</div>
-            <div id="quranContainer" class="quran-text text-3xl md:text-4xl leading-relaxed">
-                <span class="text-emerald-400/50">اختر سورة لتبدأ القراءة والاستماع</span>
-            </div>
-        </div>
-
-        <!-- Audio Player (Hidden UI, handled by custom controls) -->
-        <audio id="audioPlayer"></audio>
         
-        <!-- Controls Floating Bar -->
-        <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl glass-panel p-4 flex items-center gap-4">
-            <div id="miniInfo" class="hidden md:block flex-1 truncate text-emerald-300 text-sm">
-                مستعد للبدء...
-            </div>
-            <div class="flex items-center gap-6 mx-auto">
-                <button onclick="changeAyah(-1)" class="text-amber-400 hover:text-white transition-colors text-2xl">⏮</button>
-                <button id="mainToggleBtn" class="bg-amber-500 text-slate-900 w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold shadow-xl">▶</button>
-                <button onclick="changeAyah(1)" class="text-amber-400 hover:text-white transition-colors text-2xl">⏭</button>
-            </div>
-            <div class="flex-1 text-left">
-                <span id="currentTime" class="text-xs text-emerald-400">00:00</span>
-            </div>
-        </div>
+        <p class="dua-text">
+            "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا"
+        </p>
+        
+        <p class="text-emerald-200 text-sm italic">
+            - حصن المسلم -
+        </p>
+
+        <button id="installBtn" class="install-btn">
+            تثبيت التطبيق على الجهاز
+        </button>
     </div>
 
     <script>
-        const flowerContainer = document.getElementById('flower-container');
-        const surahSelect = document.getElementById('surahSelect');
-        const quranContainer = document.getElementById('quranContainer');
-        const audioPlayer = document.getElementById('audioPlayer');
-        const playBtn = document.getElementById('playBtn');
-        const mainToggleBtn = document.getElementById('mainToggleBtn');
-        const miniInfo = document.getElementById('miniInfo');
+        // التعامل مع ميزة التثبيت (PWA)
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
 
-        let currentAyahs = [];
-        let currentIndex = 0;
-        let isPlaying = false;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // منع المتصفح من إظهار شريط التثبيت التلقائي
+            e.preventDefault();
+            // حفظ الحدث لاستخدامه لاحقاً
+            deferredPrompt = e;
+            // إظهار زر التثبيت الخاص بنا
+            installBtn.style.display = 'inline-block';
+        });
 
-        // --- Flowers Effect ---
-        function createFlower() {
-            const flower = document.createElement('div');
-            flower.className = 'flower';
-            const icons = ['🌸', '🌼', '🍃', '✨'];
-            flower.innerHTML = icons[Math.floor(Math.random() * icons.length)];
-            flower.style.left = Math.random() * 100 + 'vw';
-            flower.style.fontSize = (Math.random() * 20 + 10) + 'px';
-            flower.style.duration = (Math.random() * 5 + 5) + 's';
-            flower.style.animationDuration = flower.style.duration;
-            flower.style.opacity = Math.random() * 0.5 + 0.3;
-            
-            flowerContainer.appendChild(flower);
-            setTimeout(() => flower.remove(), parseFloat(flower.style.duration) * 1000);
-        }
-        setInterval(createFlower, 800);
-
-        // --- Fetch List of Surahs ---
-        async function loadSurahsList() {
-            try {
-                const res = await fetch('https://api.alquran.cloud/v1/surah');
-                const data = await res.json();
-                surahSelect.innerHTML = '<option value="" disabled selected>اختر السورة...</option>';
-                data.data.forEach(surah => {
-                    const option = document.createElement('option');
-                    option.value = surah.number;
-                    option.textContent = `${surah.number}. ${surah.name} (${surah.englishName})`;
-                    surahSelect.appendChild(option);
-                });
-            } catch (err) {
-                surahSelect.innerHTML = '<option>فشل التحميل</option>';
-            }
-        }
-
-        // --- Load Specific Surah ---
-        async function loadSurah(id) {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            quranContainer.innerHTML = '';
-            try {
-                // Fetch Text and Audio (Alafasy reciter)
-                const res = await fetch(`https://api.alquran.cloud/v1/surah/${id}/ar.alafasy`);
-                const data = await res.json();
-                currentAyahs = data.data.ayahs;
-                currentIndex = 0;
-                renderSurah();
-                playAyah(0);
-                
-                // Update Media Session for background play
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.metadata = new MediaMetadata({
-                        title: data.data.name,
-                        artist: 'مشاري العفاسي',
-                        album: 'القرآن الكريم',
-                        artwork: [{ src: 'https://via.placeholder.com/512/064e3b/fbbf24?text=Quran', sizes: '512x512', type: 'image/png' }]
-                    });
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // إظهار نافذة التثبيت
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
                 }
-            } catch (err) {
-                quranContainer.innerHTML = 'حدث خطأ أثناء تحميل السورة.';
-            } finally {
-                document.getElementById('loadingOverlay').classList.add('hidden');
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
             }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            installBtn.style.display = 'none';
+        });
+
+        // تفعيل الخدمة (Service Worker) للعمل بدون إنترنت
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const blob = new Blob([`
+                    const CACHE_NAME = 'dua-app-v1';
+                    self.addEventListener('install', (e) => {
+                        e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['./'])));
+                    });
+                    self.addEventListener('fetch', (e) => {
+                        e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
+                    });
+                `], { type: 'text/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl);
+            });
         }
-
-        function renderSurah() {
-            quranContainer.innerHTML = currentAyahs.map((ayah, index) => 
-                `<span id="ayah-${index}" class="ayah-item">${ayah.text} <span class="text-amber-500 text-sm">﴿${ayah.numberInSurah}﴾</span> </span>`
-            ).join(' ');
-        }
-
-        function playAyah(index) {
-            if (index < 0 || index >= currentAyahs.length) return;
-            
-            currentIndex = index;
-            const ayah = currentAyahs[index];
-            
-            // UI Update
-            document.querySelectorAll('.ayah-item').forEach(el => el.classList.remove('active-ayah'));
-            const currentEl = document.getElementById(`ayah-${index}`);
-            if (currentEl) {
-                currentEl.classList.add('active-ayah');
-                currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-
-            audioPlayer.src = ayah.audio;
-            audioPlayer.play();
-            isPlaying = true;
-            mainToggleBtn.textContent = '⏸';
-            miniInfo.textContent = `جاري تشغيل: ${ayah.text.substring(0, 30)}...`;
-        }
-
-        function changeAyah(dir) {
-            let next = currentIndex + dir;
-            if (next >= 0 && next < currentAyahs.length) {
-                playAyah(next);
-            }
-        }
-
-        // --- Event Listeners ---
-        surahSelect.addEventListener('change', (e) => loadSurah(e.target.value));
-
-        audioPlayer.onended = () => {
-            if (currentIndex < currentAyahs.length - 1) {
-                playAyah(currentIndex + 1);
-            } else {
-                isPlaying = false;
-                mainToggleBtn.textContent = '▶';
-            }
-        };
-
-        mainToggleBtn.onclick = () => {
-            if (audioPlayer.paused && currentAyahs.length > 0) {
-                audioPlayer.play();
-                mainToggleBtn.textContent = '⏸';
-            } else {
-                audioPlayer.pause();
-                mainToggleBtn.textContent = '▶';
-            }
-        };
-
-        playBtn.onclick = () => {
-            if (surahSelect.value) loadSurah(surahSelect.value);
-        };
-
-        // Time Update
-        audioPlayer.ontimeupdate = () => {
-            const mins = Math.floor(audioPlayer.currentTime / 60);
-            const secs = Math.floor(audioPlayer.currentTime % 60);
-            document.getElementById('currentTime').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        };
-
-        // Background Control Support
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.setActionHandler('play', () => audioPlayer.play());
-            navigator.mediaSession.setActionHandler('pause', () => audioPlayer.pause());
-            navigator.mediaSession.setActionHandler('previoustrack', () => changeAyah(-1));
-            navigator.mediaSession.setActionHandler('nexttrack', () => changeAyah(1));
-        }
-
-        // Init
-        loadSurahsList();
     </script>
 </body>
 </html>
