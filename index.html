@@ -1,144 +1,1452 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دعاء المستجاب</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* خلفية إسلامية هادئة */
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                        url('https://images.unsplash.com/photo-1564121211835-e88c852648a2?q=80&w=2070&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            font-family: 'Amiri', serif;
-            color: white;
-            overflow: hidden;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مدير بوتات تليجرام</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #0f1526;
+    --bg3: #141b2e;
+    --panel: #111827;
+    --border: #1e2d4a;
+    --accent: #2AABEE;
+    --accent2: #00d4ff;
+    --green: #00e676;
+    --red: #ff4560;
+    --yellow: #ffb300;
+    --purple: #7c4dff;
+    --text: #e8edf5;
+    --text2: #8899bb;
+    --text3: #4a5a7a;
+    --font: 'Tajawal', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --glow: 0 0 20px rgba(42,171,238,0.3);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-        .dua-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 2rem;
-            border-radius: 1.5rem;
-            max-width: 90%;
-            width: 500px;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 2s ease-out;
-        }
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(42,171,238,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(42,171,238,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+  .app { position: relative; z-index: 1; display: flex; height: 100vh; }
 
-        .dua-text {
-            font-family: 'Aref Ruqaa', serif;
-            font-size: 2rem;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-            color: #f3f4f6;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+  /* Sidebar */
+  .sidebar {
+    width: 260px;
+    background: var(--bg2);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
 
-        .install-btn {
-            background-color: #065f46;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 9999px;
-            font-weight: bold;
-            transition: all 0.3s;
-            display: none; /* يظهر فقط عند توفر ميزة التثبيت */
-            margin-top: 1rem;
-        }
+  .logo {
+    padding: 24px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
 
-        .install-btn:hover {
-            background-color: #047857;
-            transform: scale(1.05);
-        }
-    </style>
+  .logo-icon {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 16px rgba(42,171,238,0.4);
+  }
+
+  .logo-text { font-size: 16px; font-weight: 700; line-height: 1.3; }
+  .logo-sub { font-size: 11px; color: var(--text2); font-weight: 400; }
+
+  .nav { padding: 16px 12px; flex: 1; overflow-y: auto; }
+  .nav-section { margin-bottom: 24px; }
+  .nav-label {
+    font-size: 10px; font-weight: 700;
+    color: var(--text3); letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 0 8px; margin-bottom: 8px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    cursor: pointer; transition: all 0.2s;
+    font-size: 14px; color: var(--text2);
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active {
+    background: linear-gradient(135deg, rgba(42,171,238,0.15), rgba(124,77,255,0.1));
+    color: var(--accent);
+    border: 1px solid rgba(42,171,238,0.2);
+  }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+  .badge {
+    margin-right: auto;
+    background: var(--accent);
+    color: #000;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 20px;
+  }
+  .badge.green { background: var(--green); }
+  .badge.red { background: var(--red); }
+
+  .sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .sys-stats {
+    background: var(--bg3);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 12px;
+  }
+  .stat-row { display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--text2); }
+  .stat-row:last-child { margin-bottom: 0; }
+  .stat-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 4px; }
+  .stat-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 1s; }
+
+  /* Main content */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 60px;
+    display: flex; align-items: center; gap: 16px;
+  }
+
+  .page-title { font-size: 18px; font-weight: 700; flex: 1; }
+
+  .btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none; cursor: pointer;
+    font-family: var(--font);
+    font-size: 13px; font-weight: 600;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    color: white;
+    box-shadow: 0 4px 12px rgba(42,171,238,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(42,171,238,0.4); }
+  .btn-ghost {
+    background: var(--bg3);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--border); color: var(--text); }
+  .btn-danger { background: rgba(255,69,96,0.15); color: var(--red); border: 1px solid rgba(255,69,96,0.3); }
+  .btn-success { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+  .content { flex: 1; overflow-y: auto; padding: 24px; }
+
+  /* Pages */
+  .page { display: none; animation: fadeIn 0.3s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Bots grid */
+  .bots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .bot-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .bot-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--purple));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .bot-card:hover { border-color: rgba(42,171,238,0.3); box-shadow: var(--glow); }
+  .bot-card:hover::before { opacity: 1; }
+
+  .bot-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
+  .bot-avatar {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .bot-info { flex: 1; }
+  .bot-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .bot-username { font-size: 12px; color: var(--text2); font-family: var(--mono); }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 6px;
+  }
+  .status-dot.running { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+  .status-dot.stopped { background: var(--red); }
+  .status-dot.installing { background: var(--yellow); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .status-badge {
+    font-size: 11px; padding: 3px 10px; border-radius: 20px;
+    font-weight: 600;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .status-badge.running { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+  .status-badge.stopped { background: rgba(255,69,96,0.15); color: var(--red); border: 1px solid rgba(255,69,96,0.3); }
+  .status-badge.installing { background: rgba(255,179,0,0.15); color: var(--yellow); border: 1px solid rgba(255,179,0,0.3); }
+
+  .bot-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .bot-stat {
+    background: var(--bg3);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+  .bot-stat-val { font-size: 16px; font-weight: 700; color: var(--accent); }
+  .bot-stat-label { font-size: 10px; color: var(--text2); margin-top: 2px; }
+
+  .bot-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Add Bot Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    width: 680px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .modal-title { font-size: 18px; font-weight: 700; }
+  .modal-close {
+    width: 32px; height: 32px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text2); font-size: 16px;
+    transition: all 0.2s;
+  }
+  .modal-close:hover { background: var(--red); color: white; border-color: var(--red); }
+
+  .form-group { margin-bottom: 18px; }
+  .form-label { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 8px; display: block; }
+  .form-input, .form-textarea, .form-select {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(42,171,238,0.1);
+  }
+  .form-textarea {
+    font-family: var(--mono);
+    font-size: 13px;
+    min-height: 200px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  .form-select { cursor: pointer; }
+
+  /* Code Editor area */
+  .code-header {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    padding: 10px 14px;
+  }
+  .code-lang { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 6px; }
+  .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Logs Panel */
+  .logs-container {
+    background: #060a12;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .log-line { display: flex; gap: 12px; }
+  .log-time { color: var(--text3); flex-shrink: 0; }
+  .log-info { color: var(--accent2); }
+  .log-success { color: var(--green); }
+  .log-warning { color: var(--yellow); }
+  .log-error { color: var(--red); }
+  .log-pkg { color: var(--purple); }
+
+  /* Libraries section */
+  .libs-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .lib-tag {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--accent);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .lib-tag.detected { border-color: rgba(0,230,118,0.4); background: rgba(0,230,118,0.08); color: var(--green); }
+  .lib-tag.installing { border-color: rgba(255,179,0,0.4); background: rgba(255,179,0,0.08); color: var(--yellow); }
+  .lib-tag .remove { cursor: pointer; color: var(--text3); }
+  .lib-tag .remove:hover { color: var(--red); }
+
+  /* Progress bar */
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--purple));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  /* Stats cards */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .stat-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .stat-icon.blue { background: rgba(42,171,238,0.15); }
+  .stat-icon.green { background: rgba(0,230,118,0.15); }
+  .stat-icon.purple { background: rgba(124,77,255,0.15); }
+  .stat-icon.yellow { background: rgba(255,179,0,0.15); }
+  .stat-num { font-size: 24px; font-weight: 900; }
+  .stat-lbl { font-size: 12px; color: var(--text2); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* Toast */
+  .toast-container { position: fixed; bottom: 24px; left: 24px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+    animation: slideInLeft 0.3s ease;
+    max-width: 320px;
+  }
+  @keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .toast.success { border-color: rgba(0,230,118,0.3); }
+  .toast.error { border-color: rgba(255,69,96,0.3); }
+  .toast.info { border-color: rgba(42,171,238,0.3); }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .bots-grid { grid-template-columns: 1fr; }
+  }
+
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title { font-size: 16px; font-weight: 700; }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text2);
+  }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--text); }
+  .empty-state p { font-size: 14px; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    background: var(--bg3); color: var(--text2);
+    border: 1px solid var(--border);
+  }
+
+  .templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .template-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .template-card:hover {
+    border-color: var(--accent);
+    background: var(--bg3);
+    transform: translateY(-2px);
+  }
+  .template-icon { font-size: 28px; margin-bottom: 10px; }
+  .template-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .template-desc { font-size: 12px; color: var(--text2); }
+  .template-libs { margin-top: 8px; display: flex; gap: 4px; flex-wrap: wrap; }
+  .template-lib { font-size: 10px; background: rgba(42,171,238,0.1); color: var(--accent); padding: 2px 7px; border-radius: 4px; font-family: var(--mono); }
+</style>
 </head>
 <body>
 
-    <div class="dua-card">
-        <div class="mb-4">
-            <svg class="w-12 h-12 mx-auto text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
-            </svg>
-        </div>
-        
-        <p class="dua-text">
-            "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا"
-        </p>
-        
-        <p class="text-emerald-200 text-sm italic">
-            - حصن المسلم -
-        </p>
-
-        <button id="installBtn" class="install-btn">
-            تثبيت التطبيق على الجهاز
-        </button>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🤖</div>
+      <div>
+        <div class="logo-text">BotForge</div>
+        <div class="logo-sub">مدير بوتات تليجرام</div>
+      </div>
     </div>
 
-    <script>
-        // التعامل مع ميزة التثبيت (PWA)
-        let deferredPrompt;
-        const installBtn = document.getElementById('installBtn');
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-label">الرئيسية</div>
+        <div class="nav-item active" onclick="showPage('dashboard')">
+          <span class="icon">📊</span> لوحة التحكم
+        </div>
+        <div class="nav-item" onclick="showPage('bots')">
+          <span class="icon">🤖</span> البوتات
+          <span class="badge green" id="running-count">0</span>
+        </div>
+      </div>
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // منع المتصفح من إظهار شريط التثبيت التلقائي
-            e.preventDefault();
-            // حفظ الحدث لاستخدامه لاحقاً
-            deferredPrompt = e;
-            // إظهار زر التثبيت الخاص بنا
-            installBtn.style.display = 'inline-block';
-        });
+      <div class="nav-section">
+        <div class="nav-label">الأدوات</div>
+        <div class="nav-item" onclick="showPage('editor')">
+          <span class="icon">✏️</span> محرر الكود
+        </div>
+        <div class="nav-item" onclick="showPage('packages')">
+          <span class="icon">📦</span> المكتبات
+        </div>
+        <div class="nav-item" onclick="showPage('logs')">
+          <span class="icon">📋</span> السجلات
+          <span class="badge red" id="log-badge">!</span>
+        </div>
+        <div class="nav-item" onclick="showPage('templates')">
+          <span class="icon">🗂️</span> القوالب
+        </div>
+      </div>
 
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                // إظهار نافذة التثبيت
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('User accepted the install prompt');
-                }
-                deferredPrompt = null;
-                installBtn.style.display = 'none';
-            }
-        });
+      <div class="nav-section">
+        <div class="nav-label">الإعدادات</div>
+        <div class="nav-item" onclick="showPage('settings')">
+          <span class="icon">⚙️</span> الإعدادات
+        </div>
+      </div>
+    </nav>
 
-        window.addEventListener('appinstalled', () => {
-            console.log('PWA was installed');
-            installBtn.style.display = 'none';
-        });
+    <div class="sidebar-footer">
+      <div class="sys-stats">
+        <div class="stat-row">
+          <span>المعالج</span>
+          <span id="cpu-val" style="color: var(--accent)">23%</span>
+        </div>
+        <div class="stat-bar"><div class="stat-fill" id="cpu-bar" style="width:23%"></div></div>
+        <div class="stat-row" style="margin-top:8px">
+          <span>الذاكرة</span>
+          <span id="mem-val" style="color: var(--purple)">41%</span>
+        </div>
+        <div class="stat-bar"><div class="stat-fill" id="mem-bar" style="width:41%; background: var(--purple)"></div></div>
+      </div>
+    </div>
+  </aside>
 
-        // تفعيل الخدمة (Service Worker) للعمل بدون إنترنت
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const blob = new Blob([`
-                    const CACHE_NAME = 'dua-app-v1';
-                    self.addEventListener('install', (e) => {
-                        e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['./'])));
-                    });
-                    self.addEventListener('fetch', (e) => {
-                        e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
-                    });
-                `], { type: 'text/javascript' });
-                const swUrl = URL.createObjectURL(blob);
-                navigator.serviceWorker.register(swUrl);
-            });
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title" id="page-title">لوحة التحكم</div>
+      <button class="btn btn-ghost btn-sm" onclick="refreshStats()">🔄 تحديث</button>
+      <button class="btn btn-primary" onclick="openAddModal()">➕ إضافة بوت</button>
+    </div>
+
+    <div class="content">
+
+      <!-- Dashboard Page -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon blue">🤖</div>
+            <div>
+              <div class="stat-num" id="total-bots">0</div>
+              <div class="stat-lbl">إجمالي البوتات</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">✅</div>
+            <div>
+              <div class="stat-num" id="active-bots">0</div>
+              <div class="stat-lbl">بوت نشط</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">📦</div>
+            <div>
+              <div class="stat-num" id="total-libs">0</div>
+              <div class="stat-lbl">مكتبة مثبتة</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon yellow">💬</div>
+            <div>
+              <div class="stat-num" id="total-msgs">0</div>
+              <div class="stat-lbl">رسالة اليوم</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <div class="section-title">البوتات الأخيرة</div>
+          <button class="btn btn-ghost btn-sm" onclick="showPage('bots')">عرض الكل ←</button>
+        </div>
+        <div class="bots-grid" id="dashboard-bots"></div>
+
+        <div class="divider"></div>
+        <div class="section-header">
+          <div class="section-title">📋 سجل النشاط الأخير</div>
+        </div>
+        <div class="logs-container" id="dashboard-logs">
+          <div class="log-line"><span class="log-time">00:00:00</span><span class="log-info">جاهز للبدء...</span></div>
+        </div>
+      </div>
+
+      <!-- Bots Page -->
+      <div class="page" id="page-bots">
+        <div class="section-header">
+          <div class="section-title">جميع البوتات</div>
+          <div style="display:flex; gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="stopAll()">⏹ إيقاف الكل</button>
+            <button class="btn btn-success btn-sm" onclick="startAll()">▶ تشغيل الكل</button>
+          </div>
+        </div>
+        <div class="bots-grid" id="all-bots"></div>
+        <div class="empty-state" id="no-bots-msg" style="display:none">
+          <div class="empty-icon">🤖</div>
+          <h3>لا توجد بوتات</h3>
+          <p>أضف أول بوت تليجرام لبدء التشغيل</p>
+        </div>
+      </div>
+
+      <!-- Editor Page -->
+      <div class="page" id="page-editor">
+        <div class="section-header">
+          <div class="section-title">محرر الكود</div>
+          <div style="display:flex; gap:8px">
+            <select class="form-select" style="width:200px" id="editor-bot-select">
+              <option value="">-- اختر بوتاً --</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="saveAndRun()">💾 حفظ وتشغيل</button>
+          </div>
+        </div>
+        <div class="code-header">
+          <div class="code-lang">
+            <div class="code-dot" style="background:#ff5f57"></div>
+            <div class="code-dot" style="background:#febc2e"></div>
+            <div class="code-dot" style="background:#28c840"></div>
+            <span style="margin-right: 8px">Python • bot.py</span>
+          </div>
+          <div style="display:flex; gap:6px">
+            <button class="btn btn-ghost btn-sm" onclick="detectLibs()">🔍 كشف المكتبات</button>
+            <button class="btn btn-ghost btn-sm" onclick="formatCode()">✨ تنسيق</button>
+          </div>
+        </div>
+        <textarea class="form-textarea" id="code-editor" style="border-radius: 0 0 8px 8px; min-height: 400px; font-size: 13px" placeholder="# اكتب كود بوت تليجرام هنا...
+
+import telebot
+
+bot = telebot.TeleBot('YOUR_TOKEN')
+
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.reply_to(message, 'مرحباً! أنا بوت تليجرام 🤖')
+
+bot.polling(none_stop=True)"></textarea>
+        
+        <div style="margin-top: 16px">
+          <div class="section-header">
+            <div class="section-title">🔍 المكتبات المكتشفة</div>
+            <button class="btn btn-success btn-sm" onclick="installDetectedLibs()">📦 تثبيت الكل</button>
+          </div>
+          <div class="libs-list" id="detected-libs">
+            <span style="color: var(--text2); font-size: 13px">اكتب الكود ثم اضغط "كشف المكتبات"</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Packages Page -->
+      <div class="page" id="page-packages">
+        <div class="section-header">
+          <div class="section-title">إدارة المكتبات</div>
+        </div>
+        <div style="display:flex; gap:12px; margin-bottom: 20px">
+          <input class="form-input" id="pkg-search" placeholder="ابحث أو أضف مكتبة... (مثال: python-telegram-bot)" style="flex:1">
+          <button class="btn btn-primary" onclick="installPackage()">📦 تثبيت</button>
+        </div>
+
+        <div class="section-header">
+          <div class="section-title">📦 المكتبات المثبتة</div>
+          <span id="pkg-count" class="chip">0 مكتبة</span>
+        </div>
+        <div id="installed-packages" style="display:flex; flex-wrap:wrap; gap:8px">
+          <span style="color: var(--text2); font-size: 13px">لا توجد مكتبات مثبتة</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section-title" style="margin-bottom: 16px">🌟 المكتبات الشائعة</div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px" id="popular-packages"></div>
+      </div>
+
+      <!-- Logs Page -->
+      <div class="page" id="page-logs">
+        <div class="section-header">
+          <div class="section-title">سجلات النظام</div>
+          <div style="display:flex; gap:8px">
+            <select class="form-select" style="width:160px" id="log-filter">
+              <option value="all">كل السجلات</option>
+              <option value="info">معلومات</option>
+              <option value="success">نجاح</option>
+              <option value="error">أخطاء</option>
+              <option value="warning">تحذيرات</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" onclick="clearLogs()">🗑 مسح</button>
+          </div>
+        </div>
+        <div class="logs-container" style="max-height: 500px" id="full-logs"></div>
+      </div>
+
+      <!-- Templates Page -->
+      <div class="page" id="page-templates">
+        <div class="section-header">
+          <div class="section-title">قوالب البوتات الجاهزة</div>
+        </div>
+        <div class="templates-grid" id="templates-grid"></div>
+      </div>
+
+      <!-- Settings Page -->
+      <div class="page" id="page-settings">
+        <div class="section-header">
+          <div class="section-title">⚙️ إعدادات النظام</div>
+        </div>
+        <div style="max-width: 520px; display: flex; flex-direction: column; gap: 16px">
+          <div class="form-group">
+            <label class="form-label">Python Path</label>
+            <input class="form-input" value="/usr/bin/python3" id="python-path">
+          </div>
+          <div class="form-group">
+            <label class="form-label">pip Path</label>
+            <input class="form-input" value="/usr/bin/pip3" id="pip-path">
+          </div>
+          <div class="form-group">
+            <label class="form-label">مجلد البوتات</label>
+            <input class="form-input" value="/home/bots" id="bots-dir">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Auto-restart عند الخطأ</label>
+            <select class="form-select" id="auto-restart">
+              <option value="yes">مفعّل</option>
+              <option value="no">معطّل</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+        </div>
+      </div>
+
+    </div><!-- end content -->
+  </main>
+</div>
+
+<!-- Add Bot Modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">➕ إضافة بوت جديد</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">اسم البوت</label>
+      <input class="form-input" id="bot-name" placeholder="مثال: بوت الترحيب">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Bot Token (من @BotFather)</label>
+      <input class="form-input" id="bot-token" placeholder="1234567890:AAF..." style="font-family: var(--mono); font-size: 13px">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">📝 كود البوت (Python)</label>
+      <div class="code-header">
+        <div class="code-lang">
+          <div class="code-dot" style="background:#ff5f57"></div>
+          <div class="code-dot" style="background:#febc2e"></div>
+          <div class="code-dot" style="background:#28c840"></div>
+          <span style="margin-right:8px">bot.py</span>
+        </div>
+        <div style="display:flex; gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="autoDetectFromModal()">🔍 كشف تلقائي</button>
+          <button class="btn btn-ghost btn-sm" onclick="useTemplate()">📋 قالب</button>
+        </div>
+      </div>
+      <textarea class="form-textarea" id="bot-code" style="border-radius: 0 0 8px 8px"
+        placeholder="# الصق كود بوتك هنا...
+# سيتم كشف المكتبات وتثبيتها تلقائياً
+
+import telebot
+
+bot = telebot.TeleBot('TOKEN')
+
+@bot.message_handler(commands=['start'])
+def welcome(message):
+    bot.send_message(message.chat.id, 'مرحباً! 👋')
+
+bot.polling()"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">📦 المكتبات المكتشفة تلقائياً</label>
+      <div class="libs-list" id="modal-detected-libs">
+        <span style="color: var(--text2); font-size: 13px">اكتب الكود أولاً...</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">إضافة مكتبات يدوياً</label>
+      <div style="display:flex; gap:8px">
+        <input class="form-input" id="manual-lib" placeholder="اسم المكتبة...">
+        <button class="btn btn-ghost btn-sm" onclick="addManualLib()">➕ إضافة</button>
+      </div>
+      <div class="libs-list" style="margin-top: 8px" id="manual-libs"></div>
+    </div>
+
+    <div style="display:flex; gap:10px; justify-content: flex-end; margin-top: 8px">
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+      <button class="btn btn-primary" onclick="addBot()">🚀 إضافة وتشغيل</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ===========================
+// State
+// ===========================
+let bots = [];
+let installedPackages = new Set(['pyTelegramBotAPI', 'requests', 'python-dotenv']);
+let allLogs = [];
+let manualLibs = [];
+let totalMessages = 0;
+
+const POPULAR_PACKAGES = [
+  { name: 'pyTelegramBotAPI', desc: 'telebot - واجهة تليجرام بسيطة', icon: '🤖' },
+  { name: 'python-telegram-bot', desc: 'مكتبة تليجرام متقدمة', icon: '📡' },
+  { name: 'aiogram', desc: 'إطار تليجرام غير متزامن', icon: '⚡' },
+  { name: 'requests', desc: 'طلبات HTTP', icon: '🌐' },
+  { name: 'aiohttp', desc: 'HTTP غير متزامن', icon: '🚀' },
+  { name: 'python-dotenv', desc: 'إدارة متغيرات البيئة', icon: '🔐' },
+  { name: 'SQLAlchemy', desc: 'قاعدة بيانات ORM', icon: '🗄️' },
+  { name: 'redis', desc: 'Redis cache', icon: '🔴' },
+  { name: 'Pillow', desc: 'معالجة الصور', icon: '🖼️' },
+  { name: 'pandas', desc: 'تحليل البيانات', icon: '📊' },
+  { name: 'beautifulsoup4', desc: 'تحليل HTML', icon: '🕷️' },
+  { name: 'schedule', desc: 'جدولة المهام', icon: '⏰' },
+];
+
+const TEMPLATES = [
+  {
+    name: 'بوت ترحيب', icon: '👋', desc: 'بوت بسيط يرد على المستخدمين',
+    libs: ['pyTelegramBotAPI'],
+    code: `import telebot
+
+TOKEN = 'YOUR_TOKEN_HERE'
+bot = telebot.TeleBot(TOKEN)
+
+@bot.message_handler(commands=['start', 'help'])
+def send_welcome(message):
+    bot.reply_to(message, f"مرحباً {message.from_user.first_name}! 👋\\nأنا بوت تليجرام.")
+
+@bot.message_handler(func=lambda m: True)
+def echo_all(message):
+    bot.reply_to(message, "استلمت: " + message.text)
+
+bot.polling(none_stop=True)`
+  },
+  {
+    name: 'بوت الطقس', icon: '🌤️', desc: 'يجلب بيانات الطقس من API',
+    libs: ['pyTelegramBotAPI', 'requests'],
+    code: `import telebot
+import requests
+
+TOKEN = 'YOUR_TOKEN'
+WEATHER_API = 'YOUR_OPENWEATHER_KEY'
+bot = telebot.TeleBot(TOKEN)
+
+@bot.message_handler(commands=['weather'])
+def get_weather(message):
+    city = message.text.replace('/weather ', '')
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={WEATHER_API}&units=metric&lang=ar"
+    res = requests.get(url).json()
+    if res.get('main'):
+        temp = res['main']['temp']
+        desc = res['weather'][0]['description']
+        bot.reply_to(message, f"🌡️ {city}: {temp}°C\\n{desc}")
+    else:
+        bot.reply_to(message, "المدينة غير موجودة!")
+
+bot.polling(none_stop=True)`
+  },
+  {
+    name: 'بوت قاعدة بيانات', icon: '🗄️', desc: 'يحفظ بيانات المستخدمين',
+    libs: ['pyTelegramBotAPI', 'SQLAlchemy'],
+    code: `import telebot
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.orm import DeclarativeBase, Session
+
+TOKEN = 'YOUR_TOKEN'
+bot = telebot.TeleBot(TOKEN)
+engine = create_engine('sqlite:///bot.db')
+
+class Base(DeclarativeBase): pass
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    telegram_id = Column(Integer, unique=True)
+    name = Column(String)
+
+Base.metadata.create_all(engine)
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    with Session(engine) as session:
+        user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
+        if not user:
+            session.add(User(telegram_id=message.from_user.id, name=message.from_user.first_name))
+            session.commit()
+            bot.reply_to(message, "تم تسجيلك! ✅")
+        else:
+            bot.reply_to(message, f"مرحباً مجدداً {user.name}!")
+
+bot.polling()`
+  },
+  {
+    name: 'بوت الجدولة', icon: '⏰', desc: 'يرسل رسائل دورية',
+    libs: ['pyTelegramBotAPI', 'schedule'],
+    code: `import telebot
+import schedule
+import time
+import threading
+
+TOKEN = 'YOUR_TOKEN'
+CHAT_ID = 'YOUR_CHAT_ID'
+bot = telebot.TeleBot(TOKEN)
+
+def send_daily():
+    bot.send_message(CHAT_ID, "📅 تذكيرك اليومي!")
+
+schedule.every().day.at("09:00").do(send_daily)
+
+def scheduler_thread():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.reply_to(message, "بوت الجدولة جاهز! ⏰")
+
+threading.Thread(target=scheduler_thread, daemon=True).start()
+bot.polling()`
+  },
+  {
+    name: 'بوت الصور', icon: '🖼️', desc: 'يعالج ويعدل الصور',
+    libs: ['pyTelegramBotAPI', 'Pillow'],
+    code: `import telebot
+from PIL import Image, ImageFilter
+import io
+
+TOKEN = 'YOUR_TOKEN'
+bot = telebot.TeleBot(TOKEN)
+
+@bot.message_handler(content_types=['photo'])
+def process_photo(message):
+    file_id = message.photo[-1].file_id
+    file = bot.get_file(file_id)
+    downloaded = bot.download_file(file.file_path)
+    img = Image.open(io.BytesIO(downloaded))
+    blurred = img.filter(ImageFilter.BLUR)
+    buf = io.BytesIO()
+    blurred.save(buf, format='JPEG')
+    buf.seek(0)
+    bot.send_photo(message.chat.id, buf, caption="صورتك مع تأثير ضبابي 🌫️")
+
+bot.polling()`
+  },
+  {
+    name: 'بوت البيانات', icon: '📊', desc: 'يعرض وإحصائيات',
+    libs: ['pyTelegramBotAPI', 'pandas'],
+    code: `import telebot
+import pandas as pd
+import io
+
+TOKEN = 'YOUR_TOKEN'
+bot = telebot.TeleBot(TOKEN)
+
+@bot.message_handler(commands=['stats'])
+def show_stats(msg):
+    data = {'المنتج': ['A','B','C'], 'المبيعات': [150, 230, 89]}
+    df = pd.DataFrame(data)
+    total = df['المبيعات'].sum()
+    text = df.to_string(index=False)
+    bot.reply_to(msg, f"📊 الإحصائيات:\\n\\n{text}\\n\\nالإجمالي: {total}")
+
+bot.polling()`
+  },
+];
+
+// ===========================
+// Init
+// ===========================
+window.onload = () => {
+  renderPopularPackages();
+  renderTemplates();
+  updateStats();
+  startSimulation();
+  addLog('النظام', 'تم تشغيل مدير البوتات بنجاح ✅', 'success');
+  addLog('النظام', 'جاهز لإضافة وتشغيل البوتات', 'info');
+};
+
+// ===========================
+// Navigation
+// ===========================
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const navItem = [...document.querySelectorAll('.nav-item')].find(n => n.getAttribute('onclick')?.includes(name));
+  if (navItem) navItem.classList.add('active');
+  const titles = { dashboard: 'لوحة التحكم', bots: 'البوتات', editor: 'محرر الكود', packages: 'المكتبات', logs: 'السجلات', templates: 'القوالب', settings: 'الإعدادات' };
+  document.getElementById('page-title').textContent = titles[name] || name;
+  if (name === 'bots') renderAllBots();
+  if (name === 'logs') renderFullLogs();
+  if (name === 'packages') renderInstalledPackages();
+  if (name === 'dashboard') { renderDashboardBots(); renderDashboardLogs(); }
+  if (name === 'editor') updateEditorBotSelect();
+}
+
+// ===========================
+// Add Bot
+// ===========================
+function openAddModal() {
+  document.getElementById('add-modal').classList.add('open');
+  document.getElementById('bot-name').value = '';
+  document.getElementById('bot-token').value = '';
+  document.getElementById('bot-code').value = '';
+  manualLibs = [];
+  renderManualLibs();
+  document.getElementById('modal-detected-libs').innerHTML = '<span style="color: var(--text2); font-size: 13px">اكتب الكود أولاً...</span>';
+}
+function closeModal() {
+  document.getElementById('add-modal').classList.remove('open');
+}
+
+function autoDetectFromModal() {
+  const code = document.getElementById('bot-code').value;
+  const libs = detectLibrariesFromCode(code);
+  renderModalDetectedLibs(libs);
+}
+
+function detectLibrariesFromCode(code) {
+  const patterns = [
+    { regex: /import\s+telebot|from\s+telebot/g, lib: 'pyTelegramBotAPI' },
+    { regex: /from\s+telegram|import\s+telegram(?!\s*bot)/g, lib: 'python-telegram-bot' },
+    { regex: /from\s+aiogram|import\s+aiogram/g, lib: 'aiogram' },
+    { regex: /import\s+requests|from\s+requests/g, lib: 'requests' },
+    { regex: /import\s+aiohttp|from\s+aiohttp/g, lib: 'aiohttp' },
+    { regex: /from\s+dotenv|import\s+dotenv/g, lib: 'python-dotenv' },
+    { regex: /from\s+sqlalchemy|import\s+sqlalchemy/gi, lib: 'SQLAlchemy' },
+    { regex: /import\s+redis|from\s+redis/g, lib: 'redis' },
+    { regex: /from\s+PIL|import\s+PIL|from\s+Pillow/g, lib: 'Pillow' },
+    { regex: /import\s+pandas|from\s+pandas/g, lib: 'pandas' },
+    { regex: /import\s+numpy|from\s+numpy/g, lib: 'numpy' },
+    { regex: /from\s+bs4|import\s+bs4|BeautifulSoup/g, lib: 'beautifulsoup4' },
+    { regex: /import\s+schedule/g, lib: 'schedule' },
+    { regex: /import\s+httpx|from\s+httpx/g, lib: 'httpx' },
+    { regex: /import\s+motor|from\s+motor/g, lib: 'motor' },
+    { regex: /import\s+pymongo|from\s+pymongo/g, lib: 'pymongo' },
+    { regex: /import\s+flask|from\s+flask/gi, lib: 'Flask' },
+    { regex: /import\s+fastapi|from\s+fastapi/gi, lib: 'fastapi' },
+    { regex: /import\s+celery|from\s+celery/g, lib: 'celery' },
+    { regex: /import\s+pydantic|from\s+pydantic/g, lib: 'pydantic' },
+  ];
+  const found = [];
+  for (const p of patterns) {
+    if (p.regex.test(code)) found.push(p.lib);
+  }
+  return [...new Set(found)];
+}
+
+function renderModalDetectedLibs(libs) {
+  const container = document.getElementById('modal-detected-libs');
+  if (!libs.length) {
+    container.innerHTML = '<span style="color: var(--text2); font-size: 13px">لم يتم اكتشاف مكتبات خارجية</span>';
+    return;
+  }
+  container.innerHTML = libs.map(lib => `
+    <div class="lib-tag detected">
+      📦 ${lib}
+      <span style="font-size: 10px; color: var(--text3)">• مكتشف تلقائياً</span>
+    </div>
+  `).join('');
+}
+
+function addManualLib() {
+  const input = document.getElementById('manual-lib');
+  const lib = input.value.trim();
+  if (!lib) return;
+  if (!manualLibs.includes(lib)) {
+    manualLibs.push(lib);
+    renderManualLibs();
+  }
+  input.value = '';
+}
+
+function renderManualLibs() {
+  const container = document.getElementById('manual-libs');
+  container.innerHTML = manualLibs.map((lib, i) => `
+    <div class="lib-tag">
+      📦 ${lib}
+      <span class="remove" onclick="removeManualLib(${i})">✕</span>
+    </div>
+  `).join('') || '';
+}
+function removeManualLib(i) { manualLibs.splice(i, 1); renderManualLibs(); }
+
+function addBot() {
+  const name = document.getElementById('bot-name').value.trim();
+  const token = document.getElementById('bot-token').value.trim();
+  const code = document.getElementById('bot-code').value.trim();
+
+  if (!name || !token) { showToast('يجب إدخال الاسم والتوكن!', 'error'); return; }
+
+  const detectedLibs = detectLibrariesFromCode(code);
+  const allLibs = [...new Set([...detectedLibs, ...manualLibs])];
+
+  const bot = {
+    id: Date.now(),
+    name,
+    token: token.substring(0, 10) + '...',
+    code,
+    status: 'installing',
+    libs: allLibs,
+    startTime: Date.now(),
+    messages: 0,
+    uptime: 0,
+    emoji: ['🤖','🦾','⚡','🚀','🛸','🔮'][Math.floor(Math.random() * 6)]
+  };
+
+  bots.push(bot);
+  closeModal();
+  showPage('bots');
+
+  addLog(name, `إضافة البوت مع ${allLibs.length} مكتبة`, 'info');
+
+  // Simulate install + start
+  if (allLibs.length > 0) {
+    showToast(`جاري تثبيت ${allLibs.length} مكتبة...`, 'info');
+    let delay = 0;
+    for (const lib of allLibs) {
+      delay += 1000 + Math.random() * 1500;
+      setTimeout(() => {
+        installedPackages.add(lib);
+        addLog(name, `تم تثبيت ${lib} بنجاح ✅`, 'pkg');
+        renderInstalledPackages();
+      }, delay);
+    }
+    setTimeout(() => {
+      bot.status = 'running';
+      addLog(name, `تم تشغيل البوت بنجاح 🚀`, 'success');
+      showToast(`${name} يعمل الآن!`, 'success');
+      updateStats();
+      renderAllBots();
+    }, delay + 800);
+  } else {
+    setTimeout(() => {
+      bot.status = 'running';
+      addLog(name, `تم تشغيل البوت 🚀`, 'success');
+      showToast(`${name} يعمل الآن!`, 'success');
+      updateStats();
+      renderAllBots();
+    }, 1200);
+  }
+
+  updateStats();
+  renderAllBots();
+}
+
+// ===========================
+// Bot Card
+// ===========================
+function makeBotCard(bot) {
+  const uptime = getUptime(bot);
+  return `
+    <div class="bot-card" id="bot-${bot.id}">
+      <div class="bot-header">
+        <div class="bot-avatar">${bot.emoji}</div>
+        <div class="bot-info">
+          <div class="bot-name">${bot.name}</div>
+          <div class="bot-username" style="font-family: var(--mono)">${bot.token}</div>
+        </div>
+        <div>
+          <span class="status-badge ${bot.status}">
+            <span class="status-dot ${bot.status}"></span>
+            ${bot.status === 'running' ? 'يعمل' : bot.status === 'installing' ? 'يثبّت...' : 'متوقف'}
+          </span>
+        </div>
+      </div>
+
+      <div class="bot-stats">
+        <div class="bot-stat">
+          <div class="bot-stat-val">${bot.messages}</div>
+          <div class="bot-stat-label">رسالة</div>
+        </div>
+        <div class="bot-stat">
+          <div class="bot-stat-val">${bot.libs.length}</div>
+          <div class="bot-stat-label">مكتبة</div>
+        </div>
+        <div class="bot-stat">
+          <div class="bot-stat-val">${uptime}</div>
+          <div class="bot-stat-label">وقت التشغيل</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 14px">
+        <div style="font-size: 11px; color: var(--text2); margin-bottom: 6px">المكتبات:</div>
+        <div class="libs-list">
+          ${bot.libs.length ? bot.libs.map(l => `<div class="lib-tag" style="font-size: 11px">📦 ${l}</div>`).join('') : '<span style="color: var(--text3); font-size: 12px">لا مكتبات</span>'}
+        </div>
+      </div>
+
+      <div class="bot-actions">
+        ${bot.status === 'running' 
+          ? `<button class="btn btn-danger btn-sm" onclick="stopBot(${bot.id})">⏹ إيقاف</button>`
+          : bot.status === 'stopped' 
+          ? `<button class="btn btn-success btn-sm" onclick="startBot(${bot.id})">▶ تشغيل</button>` 
+          : `<button class="btn btn-ghost btn-sm" disabled>⏳ جاري...</button>`
         }
-    </script>
-</body>
-</html>
+        <button class="btn btn-ghost btn-sm" onclick="viewLogs(${bot.id})">📋 السجل</button>
+        <button class="btn btn-ghost btn-sm" onclick="editBot(${bot.id})">✏️ تعديل</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteBot(${bot.id})">🗑</button>
+      </div>
+    </div>
+  `;
+}
 
+function getUptime(bot) {
+  if (bot.status !== 'running') return '—';
+  const secs = Math.floor((Date.now() - bot.startTime) / 1000);
+  if (secs < 60) return secs + 'ث';
+  if (secs < 3600) return Math.floor(secs/60) + 'د';
+  return Math.floor(secs/3600) + 'س';
+}
+
+function renderAllBots() {
+  const container = document.getElementById('all-bots');
+  const noMsg = document.getElementById('no-bots-msg');
+  if (!bots.length) {
+    container.innerHTML = '';
+    noMsg.style.display = 'block';
+  } else {
+    noMsg.style.display = 'none';
+    container.innerHTML = bots.map(makeBotCard).join('');
+  }
+}
+
+function renderDashboardBots() {
+  const container = document.getElementById('dashboard-bots');
+  const recent = bots.slice(-3);
+  container.innerHTML = recent.length ? recent.map(makeBotCard).join('') : '<div style="color: var(--text2); font-size: 14px">لا توجد بوتات بعد. أضف أول بوت!</div>';
+}
+
+function stopBot(id) {
+  const bot = bots.find(b => b.id === id);
+  if (bot) {
+    bot.status = 'stopped';
+    addLog(bot.name, 'تم إيقاف البوت', 'warning');
+    showToast(`تم إيقاف ${bot.name}`, 'info');
+    updateStats(); renderAllBots(); renderDashboardBots();
+  }
+}
+
+function startBot(id) {
+  const bot = bots.find(b => b.id === id);
+  if (bot) {
+    bot.status = 'running';
+    bot.startTime = Date.now();
+    addLog(bot.name, 'تم تشغيل البوت مجدداً', 'success');
+    showToast(`تم تشغيل ${bot.name}!`, 'success');
+    updateStats(); renderAllBots(); renderDashboardBots();
+  }
+}
+
+function deleteBot(id) {
+  const bot = bots.find(b => b.id === id);
+  if (bot && confirm(`هل تريد حذف بوت "${bot.name}"؟`)) {
+    bots = bots.filter(b => b.id !== id);
+    addLog(bot.name, 'تم حذف البوت', 'error');
+    showToast(`تم حذف ${bot.name}`, 'error');
+    updateStats(); renderAllBots(); renderDashboardBots();
+  }
+}
+
+function editBot(id) {
+  const bot = bots.find(b => b.id === id);
+  if (!bot) return;
+  document.getElementById('code-editor').value = bot.code;
+  document.getElementById('editor-bot-select').value = id;
+  showPage('editor');
+}
+
+function viewLogs(id) {
+  const bot = bots.find(b => b.id === id);
+  showPage('logs');
+}
+
+function stopAll() { bots.forEach(b => { if (b.status === 'running') stopBot(b.id); }); }
+function startAll() { bots.forEach(b => { if (b.status === 'stopped') startBot(b.id); }); }
+
+// ===========================
+// Editor
+// ===========================
+function updateEditorBotSelect() {
+  const select = document.getElementById('editor-bot-select');
+  select.innerHTML = '<option value="">-- اختر بوتاً --</option>' +
+    bots.map(b => `<option value="${b.id}">${b.emoji} ${b.name}</option>`).join('');
+}
+
+function detectLibs() {
+  const code = document.getElementById('code-editor').value;
+  const libs = detectLibrariesFromCode(code);
+  const container = document.getElementById('detected-libs');
+  if (!libs.length) {
+    container.innerHTML = '<span style="color: var(--text2); font-size: 13px">لم يتم اكتشاف مكتبات</span>';
+    return;
+  }
+  container.innerHTML = libs.map(lib => `
+    <div class="lib-tag ${installedPackages.has(lib) ? 'detected' : 'installing'}">
+      📦 ${lib}
+      ${!installedPackages.has(lib) ? '<span style="font-size: 10px; color: var(--yellow)">• غير مثبتة</span>' : '<span style="font-size: 10px">• مثبتة ✓</span>'}
+    </div>
+  `).join('');
+  showToast(`تم اكتشاف ${libs.length} مكتبة`, 'info');
+}
+
+function installDetectedLibs() {
+  const code = document.getElementById('code-editor').value;
+  const libs = detectLibrariesFromCode(code).filter(l => !installedPackages.has(l));
+  if (!libs.length) { showToast('جميع المكتبات مثبتة بالفعل!', 'success'); return; }
+  libs.forEach((lib, i) => {
+    setTimeout(() => {
+      installedPackages.add(lib);
+      addLog('النظام', `pip install ${lib} ✅`, 'pkg');
+      showToast(`تم تثبيت ${lib}`, 'success');
+      renderInstalledPackages();
+      detectLibs();
+    }, (i+1) * 1200);
+  });
+}
+
+function saveAndRun() {
+  const botId = document.getElementById('editor-bot-select').value;
+  const code = document.getElementById('code-editor').value;
+  if (!botId) { showToast('اختر بوتاً أولاً!', 'error'); return; }
+  const bot = bots.find(b => b.id == botId);
+  if (bot) {
+    bot.code = code;
+    bot.libs = detectLibrariesFromCode(code);
+    addLog(bot.name, 'تم حفظ الكود وإعادة التشغيل', 'success');
+    showToast(`تم حفظ وتشغيل ${bot.name}!`, 'success');
+  }
+}
+
+function formatCode() {
+  showToast('تم تنسيق الكود ✨', 'success');
+}
+
+// ===========================
+// Packages
+// ===========================
+function renderPopularPackages() {
+  document.getElementById('popular-packages').innerHTML = POPULAR_PACKAGES.map(p => `
+    <div class="bot-card" style="cursor:pointer" onclick="quickInstall('${p.name}')">
+      <div style="font-size: 22px; margin-bottom: 8px">${p.icon}</div>
+      <div style="font-size: 14px; font-weight: 700; margin-bottom: 4px; font-family: var(--mono)">${p.name}</div>
+      <div style="font-size: 12px; color: var(--text2)">${p.desc}</div>
+      ${installedPackages.has(p.name) 
+        ? '<div style="margin-top: 10px"><span class="status-badge running">✓ مثبتة</span></div>'
+        : '<div style="margin-top: 10px; font-size: 11px; color: var(--text3)">انقر للتثبيت</div>'
+      }
+    </div>
+  `).join('');
+}
+
+function renderInstalledPackages() {
+  const container = document.getElementById('installed-packages');
+  const arr = [...installedPackages];
+  document.getElementById('pkg-count').textContent = arr.length + ' مكتبة';
+  document.getElementById('total-libs').textContent = arr.length;
+  container.innerHTML = arr.map(pkg => `
+    <div class="lib-tag detected">
+      📦 ${pkg}
+      <span class="remove" onclick="removePackage('${pkg}')">✕</span>
+    </div>
+  `).join('');
+  renderPopularPackages();
+}
+
+function installPackage() {
+  const input = document.getElementById('pkg-search');
+  const pkg = input.value.trim();
+  if (!pkg) return;
+  quickInstall(pkg);
+  input.value = '';
+}
+
+function quickInstall(name) {
+  if (installedPackages.has(name)) { showToast(`${name} مثبتة بالفعل!`, 'info'); return; }
+  addLog('pip', `جاري تثبيت ${name}...`, 'info');
+  showToast(`جاري تثبيت ${name}...`, 'info');
+  setTimeout(() => {
+    installedPackages.add(name);
+    addLog('pip', `تم تثبيت ${name} ✅`, 'pkg');
+    showToast(`تم تثبيت ${name}!`, 'success');
+    renderInstalledPackages();
+  }, 1500 + Math.random() * 1000);
+}
+
+function removePackage(name) {
+  installedPackages.delete(name);
+  addLog('pip', `تم إزالة ${name}`, 'warning');
+  showToast(`تم إزالة ${name}`, 'info');
+  renderInstalledPackages();
+}
+
+// ===========================
+// Logs
+// ===========================
+function addLog(source, msg, type = 'info') {
+  const now = new Date();
+  const time = now.toTimeString().split(' ')[0];
+  allLogs.unshift({ time, source, msg, type });
+  if (allLogs.length > 200) allLogs.pop();
+  renderDashboardLogs();
+}
+
+function renderDashboardLogs() {
+  const container = document.getElementById('dashboard-logs');
+  if (!container) return;
+  container.innerHTML = allLogs.slice(0, 20).map(l => `
+    <div class="log-line">
+      <span cl
