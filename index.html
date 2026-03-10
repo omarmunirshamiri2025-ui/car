@@ -2,217 +2,209 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>المصحف المحمول - عمر منير</title>
-    
-    <!-- PWA Primary Meta Tags -->
-    <meta name="theme-color" content="#0f172a">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="المصحف">
-    
-    <!-- Icon for PWA -->
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2885/2885687.png">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2885/2885687.png">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مولد QR Code (بدون إنترنت)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    
+    <!-- استيراد مكتبة QR Code من مصدر موثوق -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="manifest" id="manifest">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
-            background-attachment: fixed;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
+            background: #f8fafc;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
+
+        #qrcode img {
+            margin: 0 auto;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
-        .surah-item { padding: 12px; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .active-surah { background: rgba(255, 255, 255, 0.15) !important; border-right: 4px solid #fbbf24; }
-        .flower { position: fixed; top: -10%; z-index: 100; user-select: none; pointer-events: none; animation: fall linear forwards; }
-        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
-        #install-btn { display: none; }
+
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 12px;
+            position: fixed;
+            z-index: 50;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 30px;
+            transition: 0.3s;
+        }
+
+        #toast.show {
+            visibility: visible;
+            bottom: 50px;
+        }
     </style>
 </head>
-<body class="text-white p-4 pb-24">
+<body class="min-h-screen flex flex-col items-center p-4">
 
-    <!-- Install Prompt Custom -->
-    <div id="pwa-prompt" class="hidden fixed bottom-20 left-4 right-4 z-[300] glass-card p-4 border-yellow-500/50 border flex items-center justify-between animate-bounce">
-        <div class="flex items-center gap-3">
-            <img src="https://cdn-icons-png.flaticon.com/512/2885/2885687.png" class="w-10 h-10 rounded-lg">
+    <header class="w-full max-w-xl text-center my-8">
+        <h1 class="text-3xl font-bold text-slate-800 mb-2">مولد QR Code الذكي</h1>
+        <p class="text-slate-600 italic text-sm">حول أي رابط إلى رمز استجابة سريعة فوراً وبدون إنترنت.</p>
+        <button id="installBtn" class="hidden mt-4 bg-emerald-600 text-white px-6 py-2 rounded-full shadow-md hover:bg-emerald-700 transition-all font-medium">
+            تثبيت التطبيق على الجهاز
+        </button>
+    </header>
+
+    <main class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 border border-slate-100">
+        
+        <div class="space-y-6">
+            <!-- Input Area -->
             <div>
-                <p class="text-sm font-bold">ثبت التطبيق على هاتفك</p>
-                <p class="text-[10px] opacity-70">ليعمل بدون إنترنت وبشكل أسرع</p>
+                <label for="textInput" class="block text-sm font-bold text-slate-700 mb-2">أدخل الرابط أو النص:</label>
+                <textarea id="textInput" 
+                    placeholder="https://example.com" 
+                    class="w-full h-28 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 resize-none input-focus outline-none transition-all"
+                ></textarea>
+            </div>
+
+            <!-- Color Options -->
+            <div class="flex items-center justify-between gap-4 p-3 bg-slate-50 rounded-2xl">
+                <div class="flex flex-col">
+                    <span class="text-xs font-bold text-slate-500 mb-1">لون الرمز:</span>
+                    <input type="color" id="fgColor" value="#000000" class="h-8 w-12 rounded cursor-pointer">
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xs font-bold text-slate-500 mb-1">الخلفية:</span>
+                    <input type="color" id="bgColor" value="#ffffff" class="h-8 w-12 rounded cursor-pointer">
+                </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button id="generateBtn" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-lg shadow-lg shadow-blue-200 transition-all active:scale-95">
+                توليد الرمز الآن
+            </button>
+
+            <!-- Result Display -->
+            <div id="resultSection" class="hidden flex flex-col items-center space-y-4 pt-4 border-t border-slate-100">
+                <div id="qrcode" class="p-2"></div>
+                
+                <div class="flex gap-2 w-full">
+                    <button id="downloadBtn" class="flex-1 py-3 bg-slate-800 text-white rounded-xl font-medium text-sm flex items-center justify-center gap-2 hover:bg-slate-900 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        حفظ كصورة
+                    </button>
+                </div>
             </div>
         </div>
-        <button id="install-action" class="bg-yellow-500 text-black px-4 py-1.5 rounded-lg text-xs font-bold">تثبيت</button>
-    </div>
+    </main>
 
-    <div id="welcome-modal" class="fixed inset-0 z-[200] flex items-center justify-center hidden p-6 text-center bg-black/80 backdrop-blur-sm">
-        <div class="glass-card p-8 max-w-sm w-full border-yellow-500/50 border-2">
-            <div class="text-4xl mb-4">🌸</div>
-            <h2 class="text-2xl font-bold mb-2">مرحباً بك</h2>
-            <p class="text-yellow-400 mb-6 font-bold">تم إنشاء التطبيق من عمر منير</p>
-            <button onclick="closeWelcome()" class="bg-yellow-500 text-black px-8 py-2 rounded-full font-bold">ابدأ الآن</button>
-        </div>
-    </div>
+    <footer class="mt-8 text-center text-slate-400 text-xs">
+        <p>يعمل محلياً بالكامل | لا يتم تخزين بياناتك</p>
+    </footer>
 
-    <div class="max-w-xl mx-auto">
-        <header class="text-center my-6">
-            <h1 class="text-3xl font-bold mb-1">المصحف الكامل</h1>
-            <p class="text-yellow-400 text-sm">بصوت الشيخ عبد الباسط عبد الصمد</p>
-            <div id="offline-badge" class="hidden mt-2 inline-block bg-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded">متصل محلياً</div>
-        </header>
-
-        <div class="glass-card p-5 mb-6 sticky top-4 z-50 shadow-2xl">
-            <div id="current-surah-name" class="text-lg font-bold text-center mb-3 text-yellow-400">اختر سورة</div>
-            <audio id="main-audio"></audio>
-            <input type="range" id="progress-bar" value="0" class="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-yellow-500">
-            <div class="flex justify-between text-[10px] mt-1 opacity-60">
-                <span id="current-time">00:00</span>
-                <span id="duration-time">00:00</span>
-            </div>
-            <div class="flex justify-center items-center gap-8 mt-4">
-                <button onclick="prevSurah()"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18V6h2v12H6zm3.5-6L18 6v12l-8.5-6z"/></svg></button>
-                <button onclick="togglePlay()" class="bg-yellow-500 text-black p-4 rounded-full"><svg id="play-icon" class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
-                <button onclick="nextSurah()"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M16 18h2V6h-2v12zM6 18l8.5-6L6 6v12z"/></svg></button>
-            </div>
-        </div>
-
-        <div class="mb-4">
-            <input type="text" id="search-input" placeholder="ابحث عن سورة..." class="w-full p-4 rounded-xl bg-white/10 border border-white/10 text-white outline-none focus:border-yellow-500">
-        </div>
-
-        <div id="surah-list" class="space-y-2"></div>
-
-        <footer class="mt-8 text-center text-[10px] opacity-40">تم التطوير بواسطة عمر منير &copy; 2024</footer>
-    </div>
+    <div id="toast">تم توليد الرمز!</div>
 
     <script>
-        // --- FORCE PWA INSTALL LOGIC ---
-        let deferredPrompt;
-        const pwaPrompt = document.getElementById('pwa-prompt');
-        const installBtn = document.getElementById('install-action');
+        const textInput = document.getElementById('textInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const qrcodeContainer = document.getElementById('qrcode');
+        const resultSection = document.getElementById('resultSection');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const fgColor = document.getElementById('fgColor');
+        const bgColor = document.getElementById('bgColor');
+        const toast = document.getElementById('toast');
+        const installBtn = document.getElementById('installBtn');
 
+        let qrcodeInstance = null;
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function generateQR() {
+            const text = textInput.value.trim();
+            if (!text) {
+                showToast("يرجى إدخال نص أولاً");
+                return;
+            }
+
+            // Clear previous
+            qrcodeContainer.innerHTML = "";
+            resultSection.classList.remove('hidden');
+
+            // Generate new QR
+            qrcodeInstance = new QRCode(qrcodeContainer, {
+                text: text,
+                width: 256,
+                height: 256,
+                colorDark : fgColor.value,
+                colorLight : bgColor.value,
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            showToast("تم توليد الرمز بنجاح");
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        generateBtn.onclick = generateQR;
+
+        downloadBtn.onclick = () => {
+            const img = qrcodeContainer.querySelector('img');
+            if (img) {
+                const link = document.createElement('a');
+                link.download = 'qrcode-export.png';
+                link.href = img.src;
+                link.click();
+            }
+        };
+
+        // PWA logic
+        let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            pwaPrompt.classList.remove('hidden');
+            installBtn.classList.remove('hidden');
         });
 
         installBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') pwaPrompt.classList.add('hidden');
+                if (outcome === 'accepted') installBtn.classList.add('hidden');
                 deferredPrompt = null;
             }
         });
 
-        // Dynamic Manifest Injection
-        const manifest = {
-            "name": "المصحف المحمول",
-            "short_name": "المصحف",
-            "start_url": window.location.href,
+        // Dynamic Manifest for PWA
+        const manifestData = {
+            "name": "مولد QR الذكي",
+            "short_name": "QR-Offline",
+            "start_url": ".",
             "display": "standalone",
-            "background_color": "#0f172a",
-            "theme_color": "#0f172a",
-            "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2885/2885687.png", "sizes": "512x512", "type": "image/png" }]
+            "background_color": "#f8fafc",
+            "theme_color": "#2563eb",
+            "icons": [{
+                "src": "https://cdn-icons-png.flaticon.com/512/714/714390.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }]
         };
-        const stringManifest = JSON.stringify(manifest);
-        const blob = new Blob([stringManifest], {type: 'application/json'});
-        const manifestURL = URL.createObjectURL(blob);
-        document.querySelector('head').insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestURL}">`);
+        const blob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+        document.getElementById('manifest').setAttribute('href', URL.createObjectURL(blob));
 
-        // Service Worker
+        // Register dummy SW for offline support
         if ('serviceWorker' in navigator) {
-            const swBlob = new Blob([`
-                self.addEventListener('install', e => self.skipWaiting());
-                self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-            `], {type: 'text/javascript'});
-            navigator.serviceWorker.register(URL.createObjectURL(swBlob));
+            navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGUgPT4gZS5yZXNwb25kd2l0aChmZXRjaChlLnJlcXVlc3QpKSk7');
         }
-
-        // --- APP LOGIC ---
-        const BASE_URL = "https://server7.mp3quran.net/basit/";
-        const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
-        const surahs = surahNames.map((name, i) => ({ id: i + 1, name, file: (i + 1).toString().padStart(3, '0') + ".mp3" }));
-
-        let currentIndex = -1;
-        const audio = document.getElementById('main-audio');
-        const playIcon = document.getElementById('play-icon');
-        const progressBar = document.getElementById('progress-bar');
-        const surahListEl = document.getElementById('surah-list');
-
-        function init() {
-            if (!localStorage.getItem('visited')) document.getElementById('welcome-modal').classList.remove('hidden');
-            renderSurahs(surahs);
-            startFlowerRain();
-        }
-
-        function closeWelcome() { localStorage.setItem('visited', 'true'); document.getElementById('welcome-modal').classList.add('hidden'); }
-
-        function startFlowerRain() {
-            setInterval(() => {
-                const f = document.createElement('div');
-                f.className = 'flower';
-                f.innerText = ['🌸', '🌺', '🌼'][Math.floor(Math.random()*3)];
-                f.style.left = Math.random() * 100 + 'vw';
-                f.style.animationDuration = (Math.random() * 3 + 4) + 's';
-                document.body.appendChild(f);
-                setTimeout(() => f.remove(), 6000);
-            }, 1000);
-        }
-
-        function renderSurahs(data) {
-            surahListEl.innerHTML = data.map((s, i) => `
-                <div onclick="loadSurah(${s.id-1})" class="surah-item glass-card flex justify-between items-center ${currentIndex === s.id-1 ? 'active-surah' : ''}">
-                    <span>${s.id}. ${s.name}</span>
-                    <svg class="w-4 h-4 opacity-40" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                </div>
-            `).join('');
-        }
-
-        function loadSurah(index) {
-            currentIndex = index;
-            audio.src = BASE_URL + surahs[index].file;
-            document.getElementById('current-surah-name').innerText = "سورة " + surahs[index].name;
-            audio.play();
-            playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-            renderSurahs(surahs);
-        }
-
-        function togglePlay() {
-            if (currentIndex === -1) return loadSurah(0);
-            if (audio.paused) { audio.play(); playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; }
-            else { audio.pause(); playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>'; }
-        }
-
-        function nextSurah() { if (currentIndex < 113) loadSurah(currentIndex + 1); }
-        function prevSurah() { if (currentIndex > 0) loadSurah(currentIndex - 1); }
-
-        audio.ontimeupdate = () => {
-            progressBar.value = (audio.currentTime / audio.duration) * 100 || 0;
-            document.getElementById('current-time').innerText = formatTime(audio.currentTime);
-            document.getElementById('duration-time').innerText = formatTime(audio.duration);
-        };
-        progressBar.oninput = () => audio.currentTime = (progressBar.value * audio.duration) / 100;
-        audio.onended = () => nextSurah();
-        function formatTime(s) { return isNaN(s) ? "00:00" : Math.floor(s/60).toString().padStart(2,'0') + ":" + Math.floor(s%60).toString().padStart(2,'0'); }
-
-        document.getElementById('search-input').oninput = (e) => {
-            renderSurahs(surahs.filter(s => s.name.includes(e.target.value)));
-        };
-
-        init();
     </script>
 </body>
 </html>
