@@ -1,202 +1,270 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محمل الوسائط الشامل</title>
-    
-    <!-- PWA Primary Tags -->
-    <meta name="theme-color" content="#ef4444">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Tajawal', sans-serif; }
-        .platform-icon { width: 24px; height: 24px; filter: grayscale(1); transition: 0.3s; }
-        .platform-icon:hover { filter: grayscale(0); transform: scale(1.1); }
-        .video-container {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            overflow: hidden;
-            background: #000;
-        }
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 12px;
-        }
-    </style>
-</head>
-<body class="bg-slate-900 text-white min-h-screen">
+import React, { useState, useEffect, useRef } from 'react';
+import { initializeApp } from 'firebase/app';
+import { 
+  getAuth, 
+  signInAnonymously, 
+  signInWithCustomToken, 
+  onAuthStateChanged 
+} from 'firebase/auth';
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  query, 
+  onSnapshot, 
+  serverTimestamp, 
+  doc,
+  setDoc
+} from 'firebase/firestore';
+import { 
+  MessageSquare, 
+  Send, 
+  User, 
+  Hash, 
+  LogOut, 
+  Menu, 
+  X,
+  Clock
+} from 'lucide-react';
 
-    <div class="max-w-4xl mx-auto p-4 pb-20">
-        <!-- Header & Stats -->
-        <header class="text-center py-8">
-            <div class="inline-block bg-red-500/10 text-red-500 px-4 py-1 rounded-full text-sm font-bold mb-4 animate-pulse">
-                 إجمالي مستخدمي التطبيق: <span id="userCount">جارِ التحميل...</span>
+// --- Firebase Configuration ---
+const firebaseConfig = JSON.parse(__firebase_config);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'chat-app-default';
+
+const CHANNELS = ['العامة', 'التقنية', 'الألعاب', 'المساعدة'];
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [activeChannel, setActiveChannel] = useState('العامة');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const scrollRef = useRef(null);
+
+  // 1. Auth Logic
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (error) {
+        console.error("Auth Error:", error);
+      }
+    };
+
+    initAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // 2. Data Logic (Messages)
+  useEffect(() => {
+    if (!user) return;
+
+    // RULE 1 & 2: Simple query to the correct path
+    const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', `messages_${activeChannel}`);
+    
+    const unsubscribe = onSnapshot(
+      messagesRef, 
+      (snapshot) => {
+        const msgs = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        // Sorting in memory as per RULE 2
+        msgs.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+        setMessages(msgs);
+        
+        // Scroll to bottom
+        setTimeout(() => {
+          scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      },
+      (error) => console.error("Firestore Error:", error)
+    );
+
+    return () => unsubscribe();
+  }, [user, activeChannel]);
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !user) return;
+
+    try {
+      const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', `messages_${activeChannel}`);
+      await addDoc(messagesRef, {
+        text: newMessage,
+        senderId: user.uid,
+        senderName: `مستخدم_${user.uid.slice(0, 4)}`,
+        createdAt: serverTimestamp()
+      });
+      setNewMessage('');
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-900 text-white p-4">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500 mx-auto"></div>
+          <p className="text-xl font-bold">جاري الاتصال بالسيرفر...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden font-sans" dir="rtl">
+      {/* Sidebar - Mobile Responsive */}
+      <div className={`
+        fixed inset-y-0 right-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 ease-in-out
+        ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} 
+        lg:relative lg:translate-x-0
+      `}>
+        <div className="flex flex-col h-full">
+          <div className="p-6 flex items-center justify-between">
+            <h1 className="text-xl font-bold flex items-center gap-2">
+              <MessageSquare className="text-blue-400" />
+              دردشة جماعية
+            </h1>
+            <button className="lg:hidden" onClick={() => setIsSidebarOpen(false)}>
+              <X size={20} />
+            </button>
+          </div>
+
+          <nav className="flex-1 px-4 space-y-2">
+            <p className="text-xs font-semibold text-slate-500 uppercase px-2 mb-4">الغرف المتاحة</p>
+            {CHANNELS.map(channel => (
+              <button
+                key={channel}
+                onClick={() => {
+                  setActiveChannel(channel);
+                  setIsSidebarOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  activeChannel === channel 
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
+                    : 'hover:bg-slate-800 text-slate-400'
+                }`}
+              >
+                <Hash size={18} />
+                <span className="font-medium">{channel}</span>
+              </button>
+            ))}
+          </nav>
+
+          <div className="p-4 bg-slate-800/50 mt-auto">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                <User size={20} />
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-sm font-medium truncate">معرّف المستخدم:</p>
+                <p className="text-xs text-slate-400 truncate font-mono">{user.uid}</p>
+              </div>
             </div>
-            <h1 class="text-4xl font-extrabold text-white mb-2">محمل الوسائط <span class="text-red-500">الذكي</span></h1>
-            <p class="text-slate-400">حمل من جميع المنصات الاجتماعية في مكان واحد وبسرعة عالية</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col min-w-0 bg-white shadow-2xl relative">
+        {/* Header */}
+        <header className="h-16 border-b flex items-center justify-between px-6 bg-white/80 backdrop-blur-md sticky top-0 z-10">
+          <div className="flex items-center gap-4">
+            <button 
+              className="lg:hidden p-2 hover:bg-slate-100 rounded-lg"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu size={24} />
+            </button>
+            <div>
+              <h2 className="text-lg font-bold text-slate-800">#{activeChannel}</h2>
+              <p className="text-xs text-green-500 flex items-center gap-1 font-medium">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                متصل الآن
+              </p>
+            </div>
+          </div>
         </header>
 
-        <!-- Social Icons Indicators -->
-        <div class="flex justify-center gap-6 mb-8 opacity-70">
-            <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" class="platform-icon" title="YouTube">
-            <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" class="platform-icon" title="Instagram">
-            <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" class="platform-icon" title="TikTok">
-            <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" class="platform-icon" title="Facebook">
-        </div>
-
-        <!-- Main Input -->
-        <div class="bg-slate-800 p-2 rounded-2xl shadow-2xl border border-slate-700 mb-8">
-            <div class="flex flex-col md:flex-row gap-2">
-                <input type="text" id="mediaUrl" placeholder="أدخل رابط الفيديو (يوتيوب، تيك توك، إنستقرام، فيسبوك)..." 
-                       class="flex-1 p-4 rounded-xl bg-transparent border-none focus:ring-2 focus:ring-red-500 transition-all text-right text-lg" dir="ltr">
-                <button onclick="processMedia()" class="bg-red-600 hover:bg-red-700 px-10 py-4 rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                    استخراج
-                </button>
+        {/* Messages List */}
+        <main className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#f8fafc] pattern-dots">
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-slate-400">
+              <div className="bg-white p-6 rounded-3xl shadow-sm text-center">
+                <MessageSquare size={48} className="mx-auto mb-4 opacity-20" />
+                <p>لا توجد رسائل بعد في هذه الغرفة.</p>
+                <p className="text-sm">كن أول من يرسل رسالة!</p>
+              </div>
             </div>
-        </div>
-
-        <!-- Result Area -->
-        <div id="resultArea" class="hidden space-y-6 animate-in fade-in duration-500">
-            <div id="videoPreview" class="video-container shadow-2xl rounded-2xl border border-slate-700">
-                <iframe id="mainPlayer" src="" frameborder="0" allowfullscreen></iframe>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col justify-center">
-                    <h3 class="text-xl font-bold mb-1 text-green-400">تحميل الفيديو (MP4)</h3>
-                    <p class="text-sm text-slate-400">بأعلى جودة متوفرة للمنصة</p>
-                    <button onclick="triggerDownload('video')" class="mt-4 bg-green-600 hover:bg-green-700 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
-                        تحميل فيديو
-                    </button>
+          ) : (
+            messages.map((msg) => (
+              <div 
+                key={msg.id} 
+                className={`flex flex-col ${msg.senderId === user.uid ? 'items-start' : 'items-end'}`}
+              >
+                <div className="flex items-center gap-2 mb-1 px-1">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    {msg.senderName}
+                  </span>
                 </div>
-                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col justify-center">
-                    <h3 class="text-xl font-bold mb-1 text-blue-400">تحميل صوتي (MP3)</h3>
-                    <p class="text-sm text-slate-400">استخراج الصوت فقط بوضوح عالٍ</p>
-                    <button onclick="triggerDownload('audio')" class="mt-4 bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
-                        تحميل موسيقى
-                    </button>
+                <div className={`
+                  max-w-[85%] md:max-w-[70%] px-4 py-3 rounded-2xl shadow-sm
+                  ${msg.senderId === user.uid 
+                    ? 'bg-blue-600 text-white rounded-tr-none' 
+                    : 'bg-white text-slate-800 rounded-tl-none border border-slate-100'}
+                `}>
+                  <p className="leading-relaxed break-words">{msg.text}</p>
+                  <div className={`flex items-center gap-1 mt-1 text-[9px] ${msg.senderId === user.uid ? 'text-blue-100' : 'text-slate-400'}`}>
+                    <Clock size={10} />
+                    {msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...'}
+                  </div>
                 </div>
-            </div>
-        </div>
+              </div>
+            ))
+          )}
+          <div ref={scrollRef} />
+        </main>
 
-        <!-- Placeholder -->
-        <div id="placeholder" class="py-20 text-center border-2 border-dashed border-slate-700 rounded-3xl">
-            <div class="mb-4 text-slate-600 flex justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" /></svg>
-            </div>
-            <p class="text-slate-500">ادخل الرابط في الأعلى لتحويله إلى تطبيق قابل للتحميل</p>
-        </div>
+        {/* Message Input */}
+        <footer className="p-4 bg-white border-t">
+          <form onSubmit={sendMessage} className="flex gap-2 max-w-4xl mx-auto">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="اكتب رسالتك هنا..."
+              className="flex-1 bg-slate-100 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+            />
+            <button
+              type="submit"
+              disabled={!newMessage.trim()}
+              className="bg-blue-600 text-white p-3 rounded-2xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-200"
+            >
+              <Send size={20} className="transform -rotate-90" />
+            </button>
+          </form>
+          <p className="text-center text-[10px] text-slate-400 mt-3 font-medium">
+            تطبيق دردشة آمن وفوري - جميع الحقوق محفوظة
+          </p>
+        </footer>
+      </div>
     </div>
-
-    <!-- Firebase System for Counter -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'media-downloader-app';
-
-        async function initApp() {
-            // 1. Sign in anonymously to access Firestore
-            await signInAnonymously(auth);
-            
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'stats', 'counter');
-                    
-                    try {
-                        const docSnap = await getDoc(statsRef);
-                        if (!docSnap.exists()) {
-                            // First time setup: set base users to 1000 + 1
-                            await setDoc(statsRef, { totalUsers: 1001 });
-                        } else {
-                            // Increment for current visitor
-                            await updateDoc(statsRef, { totalUsers: increment(1) });
-                        }
-
-                        // 2. Real-time Listener for the counter
-                        onSnapshot(statsRef, (doc) => {
-                            if (doc.exists()) {
-                                document.getElementById('userCount').innerText = doc.data().totalUsers.toLocaleString();
-                            }
-                        }, (err) => console.error("Firestore Error:", err));
-
-                    } catch (e) {
-                        console.error("Counter Error:", e);
-                        document.getElementById('userCount').innerText = "1,248+"; // Fallback
-                    }
-                }
-            });
-        }
-
-        initApp();
-    </script>
-
-    <script>
-        let detectedPlatform = 'youtube';
-        let lastInputUrl = '';
-
-        function processMedia() {
-            const url = document.getElementById('mediaUrl').value.trim();
-            if (!url) return alert('الرجاء إدخال رابط أولاً');
-            
-            lastInputUrl = url;
-            document.getElementById('placeholder').classList.add('hidden');
-            document.getElementById('resultArea').classList.remove('hidden');
-
-            if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                detectedPlatform = 'youtube';
-                const id = extractYoutubeId(url);
-                document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${id}`;
-                document.getElementById('videoPreview').classList.remove('hidden');
-            } else {
-                detectedPlatform = 'social';
-                document.getElementById('videoPreview').classList.add('hidden');
-                alert('تم التعرف على الرابط. اختر صيغة التحميل الآن.');
-            }
-        }
-
-        function extractYoutubeId(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
-        }
-
-        function triggerDownload(type) {
-            if (!lastInputUrl) return;
-            let downloadServiceUrl = "";
-            
-            if (detectedPlatform === 'youtube') {
-                downloadServiceUrl = `https://www.youtubepp.com/watch?v=${extractYoutubeId(lastInputUrl)}`;
-            } else {
-                downloadServiceUrl = `https://savefrom.net/?url=${encodeURIComponent(lastInputUrl)}`;
-            }
-            window.open(downloadServiceUrl, '_blank');
-        }
-
-        // PWA Setup
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const swCode = `self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request)); });`;
-                const blob = new Blob([swCode], {type: 'application/javascript'});
-                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
-            });
-        }
-    </script>
-</body>
-</html>
+  );
+}
 
