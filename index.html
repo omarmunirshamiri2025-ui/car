@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>سباق التحدي</title>
+    <!-- manifest for PWA installation -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogInNtcSIsCiAgInNob3J0X25hbWUiOiAi2LPYqNin2YIg2KfZhNiz2YrYp9ix2KkiLAogICJzdGFydV91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzIyMjIyMiIsCiAgInRoZW1lX2NvbG9yIjogIiNmZjAwMDAiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi1pY29ucy1wbmcuZmxhdGljb24uY29tLzUxMi83NDEvNzQxNDA3LnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+    <style>
+        :root {
+            --primary-color: #ff4757;
+            --road-color: #2f3542;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #2f3640;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: none; /* Prevents zooming/scrolling on mobile */
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, #1e272e, #2f3542);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #road {
+            position: relative;
+            width: 80%;
+            max-width: 400px;
+            height: 100%;
+            background-color: var(--road-color);
+            border-left: 5px solid white;
+            border-right: 5px solid white;
+            overflow: hidden;
+        }
+
+        .lane-line {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 40px;
+            background-color: #ffffff99;
+            animation: roadMove 0.5s linear infinite;
+        }
+
+        @keyframes roadMove {
+            0% { top: -50px; }
+            100% { top: 100%; }
+        }
+
+        #car {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            width: 50px;
+            height: 80px;
+            transform: translateX(-50%);
+            z-index: 10;
+            transition: left 0.1s ease-out;
+        }
+
+        .obstacle {
+            position: absolute;
+            width: 50px;
+            height: 80px;
+            background-color: #eccc68;
+            border-radius: 5px;
+            z-index: 5;
+        }
+
+        #score {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 24px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+            z-index: 20;
+        }
+
+        /* Mobile Controls */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 20px;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        .btn {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        #game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 200;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            width: 80%;
+        }
+
+        #game-over h2 { color: var(--primary-color); }
+        #game-over button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 18px;
+            border-radius: 5px;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="score">المسافة: 0</div>
+    
+    <div id="road">
+        <!-- Lane lines will be added by JS -->
+        <svg id="car" viewBox="0 0 100 200">
+            <!-- Simple SVG Car -->
+            <rect x="10" y="10" width="80" height="180" rx="15" fill="#ff4757" />
+            <rect x="20" y="40" width="60" height="40" rx="5" fill="#2f3542" />
+            <rect x="15" y="140" width="10" height="20" rx="2" fill="yellow" />
+            <rect x="75" y="140" width="10" height="20" rx="2" fill="yellow" />
+            <rect x="20" y="15" width="20" height="10" rx="2" fill="#fff" />
+            <rect x="60" y="15" width="20" height="10" rx="2" fill="#fff" />
+        </svg>
+    </div>
+
+    <div class="controls">
+        <div class="btn" id="leftBtn">◀</div>
+        <div class="btn" id="rightBtn">▶</div>
+    </div>
+
+    <div id="game-over">
+        <h2>انتهت اللعبة!</h2>
+        <p id="final-score">نقاطك: 0</p>
+        <button onclick="resetGame()">إعادة المحاولة</button>
+    </div>
+</div>
+
+<script>
+    const road = document.getElementById('road');
+    const car = document.getElementById('car');
+    const scoreElement = document.getElementById('score');
+    const gameOverScreen = document.getElementById('game-over');
+    const finalScoreText = document.getElementById('final-score');
+    
+    let score = 0;
+    let gameActive = true;
+    let carPos = 50; // percentage
+    let speed = 5;
+    let obstacles = [];
+    let frame = 0;
+
+    // Create moving road lines
+    function createLines() {
+        for(let i=0; i<10; i++) {
+            let line = document.createElement('div');
+            line.className = 'lane-line';
+            line.style.top = (i * 100) + 'px';
+            road.appendChild(line);
+        }
+    }
+
+    // Controls
+    const moveLeft = () => { if(carPos > 15) carPos -= 8; updateCarPos(); };
+    const moveRight = () => { if(carPos < 85) carPos += 8; updateCarPos(); };
+
+    document.getElementById('leftBtn').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); });
+    document.getElementById('rightBtn').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); });
+    
+    // Keyboard for desktop testing
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowLeft') moveLeft();
+        if(e.key === 'ArrowRight') moveRight();
+    });
+
+    function updateCarPos() {
+        car.style.left = carPos + '%';
+    }
+
+    function createObstacle() {
+        const obs = document.createElement('div');
+        obs.className = 'obstacle';
+        // Randomly pick a lane (Left, Middle, Right)
+        const lanes = [20, 50, 80];
+        const lane = lanes[Math.floor(Math.random() * lanes.length)];
+        obs.style.left = lane + '%';
+        obs.style.top = '-100px';
+        
+        // Random color
+        const colors = ['#eccc68', '#7bed9f', '#70a1ff', '#ffa502'];
+        obs.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        road.appendChild(obs);
+        obstacles.push({
+            el: obs,
+            top: -100,
+            lane: lane
+        });
+    }
+
+    function gameLoop() {
+        if(!gameActive) return;
+
+        frame++;
+        if(frame % 100 === 0) {
+            createObstacle();
+            speed += 0.2; // Slowly increase difficulty
+        }
+
+        obstacles.forEach((obs, index) => {
+            obs.top += speed;
+            obs.el.style.top = obs.top + 'px';
+
+            // Collision detection
+            const carRect = car.getBoundingClientRect();
+            const obsRect = obs.el.getBoundingClientRect();
+
+            if (
+                carRect.left < obsRect.right &&
+                carRect.right > obsRect.left &&
+                carRect.top < obsRect.bottom &&
+                carRect.bottom > obsRect.top
+            ) {
+                endGame();
+            }
+
+            // Remove off-screen obstacles
+            if(obs.top > window.innerHeight) {
+                obs.el.remove();
+                obstacles.splice(index, 1);
+                score += 10;
+                scoreElement.innerText = 'المسافة: ' + score;
+            }
+        });
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function endGame() {
+        gameActive = false;
+        gameOverScreen.style.display = 'block';
+        finalScoreText.innerText = 'نقاطك: ' + score;
+    }
+
+    function resetGame() {
+        // Clear obstacles
+        obstacles.forEach(o => o.el.remove());
+        obstacles = [];
+        score = 0;
+        speed = 5;
+        carPos = 50;
+        frame = 0;
+        gameActive = true;
+        updateCarPos();
+        scoreElement.innerText = 'المسافة: 0';
+        gameOverScreen.style.display = 'none';
+        gameLoop();
+    }
+
+    // Initialize
+    createLines();
+    updateCarPos();
+    gameLoop();
+
+    // Register Service Worker for PWA (Minimal)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('data:text/javascript;base64,c2VsZixhZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJyxlPT57fSksYWRkRXZlbnRMaXN0ZW5lcignZmV0Y2gnLGU9PmVyZXNwb25kV2l0aChmZXRjaChlLnJlcXVlc3QpKSk7').catch(() => {});
+        });
+    }
+</script>
+
+</body>
+</html>
+
