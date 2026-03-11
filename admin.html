@@ -1,68 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم - موقع الصلاة</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body { font-family: 'Tajawal', sans-serif; background-color: #f0f2f5; padding: 20px; }
+input, button { padding: 5px; margin: 5px; }
+ul { list-style: none; padding: 0; }
+li { background: #fff; margin: 5px 0; padding: 10px; border-radius: 5px; }
+</style>
+</head>
 <body>
 
-<h2>لوحة التحكم</h2>
+<h2>لوحة التحكم لمواقيت الصلاة</h2>
 
-<input id="name" placeholder="اسم القناة">
-<input id="link" placeholder="رابط القناة">
+<div id="loginDiv">
+    <input type="password" id="password" placeholder="ادخل كلمة المرور">
+    <button onclick="login()">دخول</button>
+</div>
 
-<button onclick="add()">اضافة قناة</button>
-
-<h3>القنوات</h3>
-
-<ul id="list"></ul>
+<div id="adminDiv" style="display:none;">
+    <h3>إدارة الصلوات</h3>
+    <input id="prayerName" placeholder="اسم الصلاة">
+    <input id="prayerTime" placeholder="الوقت HH:MM">
+    <button onclick="addPrayer()">اضافة صلاة</button>
+    <ul id="prayerList"></ul>
+</div>
 
 <script>
+let prayerData = JSON.parse(localStorage.getItem("prayers")) || [
+    { id: 'fajr', name: 'الفجر', time: '04:52' },
+    { id: 'sunrise', name: 'الشروق', time: '06:06' },
+    { id: 'dhuhr', name: 'الظهر', time: '12:12' },
+    { id: 'asr', name: 'العصر', time: '15:32' },
+    { id: 'maghrib', name: 'المغرب', time: '18:15' },
+    { id: 'isha', name: 'العشاء', time: '19:24' }
+];
 
-let channels = JSON.parse(localStorage.getItem("channels")) || []
-
-function show(){
-
-let list = document.getElementById("list")
-list.innerHTML=""
-
-channels.forEach((c,i)=>{
-
-let li = document.createElement("li")
-
-li.innerHTML = `
-${c.name}
-<button onclick="del(${i})">حذف</button>
-`
-
-list.appendChild(li)
-
-})
-
+function login(){
+    const pass = document.getElementById('password').value;
+    if(pass === '2004'){
+        document.getElementById('loginDiv').style.display='none';
+        document.getElementById('adminDiv').style.display='block';
+        showPrayers();
+    }else{
+        alert('كلمة المرور خاطئة');
+    }
 }
 
-function add(){
-
-let name = document.getElementById("name").value
-let link = document.getElementById("link").value
-
-channels.push({name:name,link:link})
-
-localStorage.setItem("channels",JSON.stringify(channels))
-
-show()
-
+function showPrayers(){
+    const list = document.getElementById('prayerList');
+    list.innerHTML='';
+    prayerData.forEach((p,i)=>{
+        const li = document.createElement('li');
+        li.innerHTML = `${p.name} - ${p.time} 
+            <button onclick="editPrayer(${i})">تعديل</button>
+            <button onclick="deletePrayer(${i})">حذف</button>
+        `;
+        list.appendChild(li);
+    });
 }
 
-function del(i){
-
-channels.splice(i,1)
-
-localStorage.setItem("channels",JSON.stringify(channels))
-
-show()
-
+function addPrayer(){
+    const name = document.getElementById('prayerName').value;
+    const time = document.getElementById('prayerTime').value;
+    if(name && time){
+        prayerData.push({id: name.toLowerCase(), name, time});
+        localStorage.setItem('prayers', JSON.stringify(prayerData));
+        showPrayers();
+    }
 }
 
-show()
+function editPrayer(i){
+    const name = prompt('اسم الصلاة:', prayerData[i].name);
+    const time = prompt('الوقت HH:MM:', prayerData[i].time);
+    if(name && time){
+        prayerData[i].name=name;
+        prayerData[i].time=time;
+        localStorage.setItem('prayers', JSON.stringify(prayerData));
+        showPrayers();
+    }
+}
 
+function deletePrayer(i){
+    prayerData.splice(i,1);
+    localStorage.setItem('prayers', JSON.stringify(prayerData));
+    showPrayers();
+}
 </script>
 
 </body>
-</html>
+  </html>
