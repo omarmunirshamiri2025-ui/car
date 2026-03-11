@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>لوحة التحكم</h2>
+
+<input id="name" placeholder="اسم القناة">
+<input id="link" placeholder="رابط القناة">
+
+<button onclick="add()">اضافة قناة</button>
+
+<h3>القنوات</h3>
+
+<ul id="list"></ul>
+
+<script>
+
+let channels = JSON.parse(localStorage.getItem("channels")) || []
+
+function show(){
+
+let list = document.getElementById("list")
+list.innerHTML=""
+
+channels.forEach((c,i)=>{
+
+let li = document.createElement("li")
+
+li.innerHTML = `
+${c.name}
+<button onclick="del(${i})">حذف</button>
+`
+
+list.appendChild(li)
+
+})
+
+}
+
+function add(){
+
+let name = document.getElementById("name").value
+let link = document.getElementById("link").value
+
+channels.push({name:name,link:link})
+
+localStorage.setItem("channels",JSON.stringify(channels))
+
+show()
+
+}
+
+function del(i){
+
+channels.splice(i,1)
+
+localStorage.setItem("channels",JSON.stringify(channels))
+
+show()
+
+}
+
+show()
+
+</script>
+
+</body>
+</html>
