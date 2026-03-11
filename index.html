@@ -3,134 +3,555 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#2196f3">
-    
-    <!-- ربط Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- أيقونات Apple -->
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
-    
-    <title>تطبيقي</title>
+    <title>حاسبة متطورة - بدون نت</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-        }
-        
-        /* زر التثبيت */
-        #install-btn {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2196f3;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 16px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            z-index: 1000;
-        }
-        
-        #install-btn:hover {
-            background: #1976d2;
-        }
-        
-        /* شريط علوي يشبه التطبيقات */
-        .app-header {
-            background: #2196f3;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .content {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             padding: 20px;
+        }
+        
+        .calculator {
+            width: 100%;
+            max-width: 400px;
+            background-color: #1a1a1a;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        .display {
+            background-color: #0d0d0d;
+            color: white;
+            padding: 30px 20px;
+            text-align: right;
+            position: relative;
+        }
+        
+        .calculation {
+            font-size: 1.2rem;
+            color: #aaa;
+            min-height: 28px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .result {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-top: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background-color: #333;
+        }
+        
+        .key {
+            border: none;
+            font-size: 1.3rem;
+            padding: 20px 10px;
+            cursor: pointer;
+            background-color: #2a2a2a;
+            color: white;
+            transition: background-color 0.2s;
+            outline: none;
+        }
+        
+        .key:active {
+            background-color: #444;
+        }
+        
+        .operator {
+            background-color: #ff9500;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .operator:active {
+            background-color: #ffaa33;
+        }
+        
+        .function {
+            background-color: #3a3a3a;
+            color: white;
+        }
+        
+        .memory {
+            background-color: #00539b;
+            color: white;
+        }
+        
+        .equals {
+            background-color: #ff2d55;
+            color: white;
+            grid-column: span 2;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #151515;
+            color: white;
+        }
+        
+        .app-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .battery {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #4cd964;
+        }
+        
+        .battery-level {
+            width: 20px;
+            height: 10px;
+            background-color: #4cd964;
+            border-radius: 2px;
+            margin-left: 5px;
+            position: relative;
+        }
+        
+        .battery-level::before {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 5px;
+            background-color: #4cd964;
+            top: -2.5px;
+            right: -3px;
+            border-radius: 0 2px 2px 0;
+        }
+        
+        .mode-switch {
+            display: flex;
+            background-color: #252525;
+            padding: 5px;
+            border-radius: 30px;
+            margin: 0 10px 10px;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .mode-btn.active {
+            background-color: #ff9500;
+            color: white;
+        }
+        
+        .scientific-panel {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background-color: #333;
+            padding: 10px;
+            display: none;
+        }
+        
+        .history-panel {
+            background-color: #252525;
+            color: white;
+            padding: 20px;
+            display: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        @media (max-width: 480px) {
+            .key {
+                padding: 15px 5px;
+                font-size: 1.1rem;
+            }
+            
+            .result {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <header class="app-header">
-        <h1>تطبيقي 🚀</h1>
-    </header>
-    
-    <div class="content">
-        <h2>مرحباً!</h2>
-        <p>هذا تطبيق ويب يعمل مثل التطبيق الأصلي</p>
-        <p>✅ يعمل بدون إنترنت</p>
-        <p>✅ يمكن تثبيته على الشاشة الرئيسية</p>
-        <p>✅ إشعارات push</p>
+    <div class="calculator">
+        <div class="header">
+            <div class="app-title">حاسبة متطورة</div>
+            <div class="battery">
+                100%
+                <div class="battery-level"></div>
+            </div>
+        </div>
+        
+        <div class="display">
+            <div class="calculation" id="calculation"></div>
+            <div class="result" id="result">0</div>
+        </div>
+        
+        <div class="mode-switch">
+            <button class="mode-btn active" id="basic-mode">عادي</button>
+            <button class="mode-btn" id="scientific-mode">علمي</button>
+            <button class="mode-btn" id="history-mode">السجل</button>
+        </div>
+        
+        <div class="scientific-panel" id="scientific-panel">
+            <button class="key function" data-value="sin">sin</button>
+            <button class="key function" data-value="cos">cos</button>
+            <button class="key function" data-value="tan">tan</button>
+            <button class="key function" data-value="π">π</button>
+            
+            <button class="key function" data-value="log">log</button>
+            <button class="key function" data-value="ln">ln</button>
+            <button class="key function" data-value="√">√</button>
+            <button class="key function" data-value="^">^</button>
+            
+            <button class="key function" data-value="(">(</button>
+            <button class="key function" data-value=")">)</button>
+            <button class="key function" data-value="e">e</button>
+            <button class="key function" data-value="!">!</button>
+            
+            <button class="key function" data-value="deg">deg</button>
+            <button class="key function" data-value="rad">rad</button>
+            <button class="key memory" data-value="mc">MC</button>
+            <button class="key memory" data-value="mr">MR</button>
+        </div>
+        
+        <div class="history-panel" id="history-panel">
+            <div class="history-list" id="history-list"></div>
+        </div>
+        
+        <div class="keypad">
+            <button class="key memory" data-value="m+">M+</button>
+            <button class="key memory" data-value="m-">M-</button>
+            <button class="key memory" data-value="ms">MS</button>
+            <button class="key function" data-value="C">C</button>
+            
+            <button class="key function" data-value="←">←</button>
+            <button class="key function" data-value="(">(</button>
+            <button class="key function" data-value=")">)</button>
+            <button class="key operator" data-value="/">/</button>
+            
+            <button class="key" data-value="7">7</button>
+            <button class="key" data-value="8">8</button>
+            <button class="key" data-value="9">9</button>
+            <button class="key operator" data-value="*">×</button>
+            
+            <button class="key" data-value="4">4</button>
+            <button class="key" data-value="5">5</button>
+            <button class="key" data-value="6">6</button>
+            <button class="key operator" data-value="-">-</button>
+            
+            <button class="key" data-value="1">1</button>
+            <button class="key" data-value="2">2</button>
+            <button class="key" data-value="3">3</button>
+            <button class="key operator" data-value="+">+</button>
+            
+            <button class="key function" data-value="±">±</button>
+            <button class="key" data-value="0">0</button>
+            <button class="key" data-value=".">.</button>
+            <button class="key equals" data-value="=">=</button>
+        </div>
     </div>
-    
-    <!-- زر التثبيت اليدوي -->
-    <button id="install-btn" onclick="installApp()">
-        📲 تثبيت التطبيق
-    </button>
 
     <script>
-        // تسجيل Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then((reg) => console.log('✅ Service Worker مسجل'))
-                .catch((err) => console.log('❌ فشل:', err));
-        }
-
-        // متغير لتخزين حدث التثبيت
-        let deferredPrompt;
-
-        // الاستماع لحدث beforeinstallprompt
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // منع الظهور التلقائي
-            e.preventDefault();
-            deferredPrompt = e;
+        document.addEventListener('DOMContentLoaded', function() {
+            // العناصر الرئيسية
+            const calculationElement = document.getElementById('calculation');
+            const resultElement = document.getElementById('result');
+            const historyList = document.getElementById('history-list');
+            const scientificPanel = document.getElementById('scientific-panel');
+            const historyPanel = document.getElementById('history-panel');
             
-            // إظهار زر التثبيت
-            document.getElementById('install-btn').style.display = 'block';
-        });
-
-        // دالة التثبيت
-        async function installApp() {
-            if (!deferredPrompt) return;
+            // المتغيرات
+            let currentInput = '0';
+            let calculation = '';
+            let result = 0;
+            let memory = 0;
+            let isScientificMode = false;
+            let isDegreeMode = true;
+            let history = [];
             
-            // إظهار نافذة التثبيت
-            deferredPrompt.prompt();
-            
-            // انتظار اختيار المستخدم
-            const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                console.log('✅ تم تثبيت التطبيق');
-                document.getElementById('install-btn').style.display = 'none';
-            } else {
-                console.log('❌ رفض المستخدم');
+            // تهيئة الآلة الحاسبة
+            function initCalculator() {
+                updateDisplay();
+                loadFromLocalStorage();
             }
             
-            deferredPrompt = null;
-        }
-
-        // التحقق إذا كان التطبيق مثبتاً بالفعل
-        window.addEventListener('appinstalled', () => {
-            console.log('🎉 التطبيق مثبت!');
-            document.getElementById('install-btn').style.display = 'none';
-            deferredPrompt = null;
+            // تحديث العرض
+            function updateDisplay() {
+                resultElement.textContent = currentInput;
+                calculationElement.textContent = calculation;
+            }
+            
+            // إضافة إلى السجل
+            function addToHistory(calc, res) {
+                history.unshift({ calculation: calc, result: res });
+                if (history.length > 10) history.pop();
+                saveToLocalStorage();
+                updateHistoryDisplay();
+            }
+            
+            // تحديث عرض السجل
+            function updateHistoryDisplay() {
+                historyList.innerHTML = '';
+                history.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.textContent = `${item.calculation} = ${item.result}`;
+                    historyItem.addEventListener('click', () => {
+                        currentInput = item.result;
+                        calculation = item.calculation;
+                        updateDisplay();
+                    });
+                    historyList.appendChild(historyItem);
+                });
+            }
+            
+            // الحفظ في localStorage
+            function saveToLocalStorage() {
+                localStorage.setItem('calculatorHistory', JSON.stringify(history));
+                localStorage.setItem('calculatorMemory', memory);
+            }
+            
+            // التحميل من localStorage
+            function loadFromLocalStorage() {
+                const savedHistory = localStorage.getItem('calculatorHistory');
+                const savedMemory = localStorage.getItem('calculatorMemory');
+                
+                if (savedHistory) {
+                    history = JSON.parse(savedHistory);
+                    updateHistoryDisplay();
+                }
+                
+                if (savedMemory) {
+                    memory = parseFloat(savedMemory);
+                }
+            }
+            
+            // معالجة الإدخال
+            function handleInput(value) {
+                if (!isNaN(value) || value === '.') {
+                    // أرقام والنقطة
+                    if (currentInput === '0' && value !== '.') {
+                        currentInput = value;
+                    } else {
+                        currentInput += value;
+                    }
+                } else if (['+', '-', '*', '/'].includes(value)) {
+                    // العمليات الأساسية
+                    calculation += currentInput + value;
+                    currentInput = '0';
+                } else if (value === '=') {
+                    // عملية الحساب
+                    calculation += currentInput;
+                    try {
+                        result = eval(calculation);
+                        if (!isFinite(result)) throw new Error('غير منتهي');
+                        addToHistory(calculation, result);
+                        currentInput = String(result);
+                        calculation = '';
+                    } catch (error) {
+                        currentInput = 'خطأ';
+                        calculation = '';
+                    }
+                } else if (value === 'C') {
+                    // مسح الكل
+                    currentInput = '0';
+                    calculation = '';
+                } else if (value === '←') {
+                    // مسح آخر رقم
+                    if (currentInput.length > 1) {
+                        currentInput = currentInput.slice(0, -1);
+                    } else {
+                        currentInput = '0';
+                    }
+                } else if (value === '±') {
+                    // تغيير الإشارة
+                    currentInput = String(parseFloat(currentInput) * -1);
+                } else if (value === '√') {
+                    // الجذر التربيعي
+                    const num = parseFloat(currentInput);
+                    if (num >= 0) {
+                        result = Math.sqrt(num);
+                        calculation = `√(${num})`;
+                        addToHistory(calculation, result);
+                        currentInput = String(result);
+                        calculation = '';
+                    } else {
+                        currentInput = 'خطأ';
+                    }
+                } else if (value === '^') {
+                    // الأس
+                    calculation += currentInput + '**';
+                    currentInput = '0';
+                } else if (value === 'π') {
+                    // باي
+                    currentInput = String(Math.PI);
+                } else if (value === 'e') {
+                    // ثابت أويلر
+                    currentInput = String(Math.E);
+                } else if (value === 'sin') {
+                    // جيب الزاوية
+                    const num = parseFloat(currentInput);
+                    result = isDegreeMode ? Math.sin(num * Math.PI / 180) : Math.sin(num);
+                    calculation = `sin(${num}${isDegreeMode ? '°' : ''})`;
+                    addToHistory(calculation, result);
+                    currentInput = String(result);
+                    calculation = '';
+                } else if (value === 'cos') {
+                    // جيب التمام
+                    const num = parseFloat(currentInput);
+                    result = isDegreeMode ? Math.cos(num * Math.PI / 180) : Math.cos(num);
+                    calculation = `cos(${num}${isDegreeMode ? '°' : ''})`;
+                    addToHistory(calculation, result);
+                    currentInput = String(result);
+                    calculation = '';
+                } else if (value === 'tan') {
+                    // الظل
+                    const num = parseFloat(currentInput);
+                    result = isDegreeMode ? Math.tan(num * Math.PI / 180) : Math.tan(num);
+                    calculation = `tan(${num}${isDegreeMode ? '°' : ''})`;
+                    addToHistory(calculation, result);
+                    currentInput = String(result);
+                    calculation = '';
+                } else if (value === 'log') {
+                    // اللوغاريتم العشري
+                    const num = parseFloat(currentInput);
+                    if (num > 0) {
+                        result = Math.log10(num);
+                        calculation = `log(${num})`;
+                        addToHistory(calculation, result);
+                        currentInput = String(result);
+                        calculation = '';
+                    } else {
+                        currentInput = 'خطأ';
+                    }
+                } else if (value === 'ln') {
+                    // اللوغاريتم الطبيعي
+                    const num = parseFloat(currentInput);
+                    if (num > 0) {
+                        result = Math.log(num);
+                        calculation = `ln(${num})`;
+                        addToHistory(calculation, result);
+                        currentInput = String(result);
+                        calculation = '';
+                    } else {
+                        currentInput = 'خطأ';
+                    }
+                } else if (value === '!') {
+                    // المضروب
+                    const num = parseInt(currentInput);
+                    if (num >= 0 && num <= 170) {
+                        result = factorial(num);
+                        calculation = `${num}!`;
+                        addToHistory(calculation, result);
+                        currentInput = String(result);
+                        calculation = '';
+                    } else {
+                        currentInput = 'خطأ';
+                    }
+                } else if (value === 'deg' || value === 'rad') {
+                    // تغيير وضع الزوايا
+                    isDegreeMode = value === 'deg';
+                } else if (value === 'm+') {
+                    // إضافة إلى الذاكرة
+                    memory += parseFloat(currentInput);
+                    saveToLocalStorage();
+                } else if (value === 'm-') {
+                    // طرح من الذاكرة
+                    memory -= parseFloat(currentInput);
+                    saveToLocalStorage();
+                } else if (value === 'ms') {
+                    // حفظ في الذاكرة
+                    memory = parseFloat(currentInput);
+                    saveToLocalStorage();
+                } else if (value === 'mr') {
+                    // استدعاء من الذاكرة
+                    currentInput = String(memory);
+                } else if (value === 'mc') {
+                    // مسح الذاكرة
+                    memory = 0;
+                    saveToLocalStorage();
+                }
+                
+                updateDisplay();
+            }
+            
+            // دالة حساب المضروب
+            function factorial(n) {
+                if (n === 0 || n === 1) return 1;
+                let result = 1;
+                for (let i = 2; i <= n; i++) {
+                    result *= i;
+                }
+                return result;
+            }
+            
+            // إضافة مستمعي الأحداث للأزرار
+            document.querySelectorAll('.key').forEach(button => {
+                button.addEventListener('click', () => {
+                    handleInput(button.getAttribute('data-value'));
+                });
+            });
+            
+            // إضافة مستمعي الأحداث لأزرار الوضع
+            document.getElementById('basic-mode').addEventListener('click', function() {
+                scientificPanel.style.display = 'none';
+                historyPanel.style.display = 'none';
+                this.classList.add('active');
+                document.getElementById('scientific-mode').classList.remove('active');
+                document.getElementById('history-mode').classList.remove('active');
+            });
+            
+            document.getElementById('scientific-mode').addEventListener('click', function() {
+                scientificPanel.style.display = 'grid';
+                historyPanel.style.display = 'none';
+                this.classList.add('active');
+                document.getElementById('basic-mode').classList.remove('active');
+                document.getElementById('history-mode').classList.remove('active');
+            });
+            
+            document.getElementById('history-mode').addEventListener('click', function() {
+                scientificPanel.style.display = 'none';
+                historyPanel.style.display = 'block';
+                this.classList.add('active');
+                document.getElementById('basic-mode').classList.remove('active');
+                document.getElementById('scientific-mode').classList.remove('active');
+            });
+            
+            // تهيئة الآلة الحاسبة
+            initCalculator();
         });
-
-        // التحقق من وضع التشغيل (standalone)
-        if (window.matchMedia('(display-mode: standalone)').matches || 
-            window.navigator.standalone === true) {
-            console.log('التطبيق يعمل في وضع التطبيق الأصلي');
-        }
     </script>
 </body>
-</html>
+                </html>
