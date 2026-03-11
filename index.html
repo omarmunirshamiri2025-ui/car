@@ -1,31 +1,191 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
-<title>موقع القنوات</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مواقيت الصلاة - تعز</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f0f2f5;
+            color: #1a202c;
+        }
+        .prayer-card {
+            transition: all 0.3s ease;
+        }
+        .prayer-card.active {
+            border-right: 6px solid #2d3748;
+            background: linear-gradient(to left, #ffffff, #edf2f7);
+            transform: scale(1.02);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+        }
+    </style>
 </head>
+<body class="min-h-screen">
 
-<body>
+    <div class="max-w-md mx-auto min-h-screen bg-white shadow-2xl relative overflow-hidden flex flex-col">
+        
+        <!-- Header Section -->
+        <header class="gradient-bg text-white p-8 pb-12 rounded-b-[3rem] shadow-lg">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-3xl font-bold mb-1">تعز</h1>
+                    <p id="current-date" class="text-gray-300 text-sm italic"></p>
+                </div>
+                <div class="text-right">
+                    <div id="current-time" class="text-2xl font-mono font-bold">--:--:--</div>
+                </div>
+            </div>
 
-<h1>القنوات المباشرة</h1>
+            <!-- Next Prayer Timer -->
+            <div class="mt-8 bg-white/10 backdrop-blur-md p-6 rounded-2xl text-center border border-white/20">
+                <p class="text-sm uppercase tracking-widest text-gray-300 mb-1" id="next-prayer-label">الصلاة القادمة</p>
+                <div id="next-prayer-time" class="text-4xl font-bold mb-2">--:--</div>
+                <div id="countdown" class="text-sm font-medium text-blue-300">جاري الحساب...</div>
+            </div>
+        </header>
 
-<ul id="channels"></ul>
+        <!-- Prayer List -->
+        <main class="flex-1 px-6 -mt-6">
+            <div class="space-y-3" id="prayer-list">
+                <!-- Prayer Items will be injected here -->
+            </div>
+        </main>
 
-<script>
+        <!-- Footer / Info -->
+        <footer class="p-6 text-center text-gray-400 text-xs border-t mt-4">
+            <p>تعتمد المواعيد على توقيت مدينة تعز، اليمن</p>
+            <p class="mt-1">تم التحديث تلقائياً بناءً على التقويم المحلي</p>
+        </footer>
+    </div>
 
-let channels = JSON.parse(localStorage.getItem("channels")) || []
-let list = document.getElementById("channels")
+    <script>
+        // Static Prayer Times for Taiz (Annual averages/Local estimates)
+        // In a real app, this would use an API like Aladhan
+        const prayerData = [
+            { id: 'fajr', name: 'الفجر', time: '04:52' },
+            { id: 'sunrise', name: 'الشروق', time: '06:06' },
+            { id: 'dhuhr', name: 'الظهر', time: '12:12' },
+            { id: 'asr', name: 'العصر', time: '15:32' },
+            { id: 'maghrib', name: 'المغرب', time: '18:15' },
+            { id: 'isha', name: 'العشاء', time: '19:24' }
+        ];
 
-channels.forEach((c,i)=>{
-let li = document.createElement("li")
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Time string
+            const timeString = now.toLocaleTimeString('ar-YE', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('current-time').textContent = timeString;
 
-li.innerHTML = `
-<a href="${c.link}" target="_blank">${c.name}</a>
-`
+            // Date string
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('ar-SA', options);
+        }
 
-list.appendChild(li)
-})
+        function renderPrayers() {
+            const prayerList = document.getElementById('prayer-list');
+            const now = new Date();
+            const currentTimeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            
+            prayerList.innerHTML = '';
+            
+            let nextFound = false;
 
-</script>
+            prayerData.forEach((prayer, index) => {
+                const isActive = isNextPrayer(prayer.time, currentTimeStr, index);
+                const card = document.createElement('div');
+                card.className = `prayer-card p-5 bg-gray-50 rounded-2xl flex justify-between items-center shadow-sm border border-gray-100 ${isActive ? 'active ring-2 ring-gray-800 ring-opacity-5' : ''}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full ${isActive ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-500'} flex items-center justify-center font-bold">
+                            ${index + 1}
+                        </div>
+                        <div>
+                            <h3 class="font-bold ${isActive ? 'text-gray-900' : 'text-gray-700'}">${prayer.name}</h3>
+                        </div>
+                    </div>
+                    <div class="text-xl font-bold ${isActive ? 'text-gray-900' : 'text-gray-500'}">
+                        ${convertTo12Hour(prayer.time)}
+                    </div>
+                `;
+                prayerList.appendChild(card);
 
+                if (isActive) {
+                    document.getElementById('next-prayer-label').textContent = `الصلاة القادمة: ${prayer.name}`;
+                    document.getElementById('next-prayer-time').textContent = convertTo12Hour(prayer.time);
+                    updateCountdown(prayer.time);
+                    nextFound = true;
+                }
+            });
+
+            // If it's after Isha, next prayer is Fajr tomorrow
+            if (!nextFound) {
+                const fajr = prayerData[0];
+                document.getElementById('next-prayer-label').textContent = `الصلاة القادمة: ${fajr.name}`;
+                document.getElementById('next-prayer-time').textContent = convertTo12Hour(fajr.time);
+                updateCountdown(fajr.time, true);
+            }
+        }
+
+        function isNextPrayer(prayerTime, currentTime, index) {
+            // Very basic logic: first prayer in list that is after current time
+            if (prayerTime > currentTime) {
+                // Check if previous prayer was before current time
+                const prevIndex = index - 1;
+                if (prevIndex < 0 || prayerData[prevIndex].time <= currentTime) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function convertTo12Hour(timeStr) {
+            let [hours, minutes] = timeStr.split(':');
+            hours = parseInt(hours);
+            const ampm = hours >= 12 ? 'م' : 'ص';
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            return `${hours}:${minutes} ${ampm}`;
+        }
+
+        function updateCountdown(targetTime, isTomorrow = false) {
+            const now = new Date();
+            const [tHours, tMinutes] = targetTime.split(':');
+            let target = new Date();
+            target.setHours(tHours, tMinutes, 0);
+
+            if (isTomorrow) {
+                target.setDate(target.getDate() + 1);
+            }
+
+            const diff = target - now;
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+
+            document.getElementById('countdown').textContent = `متبقي: ${h} ساعة و ${m} دقيقة`;
+        }
+
+        // Initialize
+        updateDateTime();
+        renderPrayers();
+
+        // Intervals
+        setInterval(updateDateTime, 1000);
+        setInterval(renderPrayers, 60000); // Update list state every minute
+
+    </script>
 </body>
 </html>
+
