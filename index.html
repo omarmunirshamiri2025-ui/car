@@ -1,415 +1,434 @@
-import { useState, useRef, useCallback } from "react";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محوّل جيبلي السحري</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #a8d8ea;
+    --soft-green: #7fbf7b;
+    --golden: #e8a838;
+    --forest: #2d6a4f;
+    --dusk: #6b4c8a;
+    --ink: #1a1a2e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: #e8f4f8;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .sky-bg {
+    position: fixed; inset: 0; z-index: 0;
+    background: linear-gradient(180deg,#b8d4f0 0%,#c9e4f5 30%,#ddf0f8 60%,#eef8e8 100%);
+  }
+  .cloud {
+    position: fixed; background: white; border-radius: 50px;
+    opacity: 0.7; animation: floatCloud linear infinite; z-index: 1;
+  }
+  .cloud::before,.cloud::after { content:''; position:absolute; background:white; border-radius:50%; }
+  .cloud-1 { width:120px;height:40px;top:10%;animation-duration:35s; }
+  .cloud-1::before { width:60px;height:60px;top:-30px;right:20px; }
+  .cloud-1::after  { width:40px;height:40px;top:-20px;right:55px; }
+  .cloud-2 { width:90px;height:30px;top:20%;animation-duration:45s;animation-delay:-15s;opacity:0.5; }
+  .cloud-2::before { width:45px;height:45px;top:-22px;right:15px; }
+  .cloud-2::after  { width:30px;height:30px;top:-15px;right:40px; }
+  .cloud-3 { width:150px;height:50px;top:8%;animation-duration:55s;animation-delay:-30s;opacity:0.6; }
+  .cloud-3::before { width:70px;height:70px;top:-35px;right:25px; }
+  .cloud-3::after  { width:50px;height:50px;top:-25px;right:65px; }
+  @keyframes floatCloud { from{transform:translateX(-200px)} to{transform:translateX(calc(100vw + 200px))} }
+  .deco-tree {
+    position:fixed; bottom:0; z-index:2; pointer-events:none;
+    font-size:6rem; filter:drop-shadow(2px 0 10px rgba(0,0,0,0.1));
+    animation: treeWay 8s ease-in-out infinite;
+  }
+  @keyframes treeWay { 0%,100%{transform:rotate(-1deg)} 50%{transform:rotate(1deg)} }
+  .deco-tree.left{left:2%} .deco-tree.right{right:2%}
+  .container { position:relative; z-index:10; max-width:900px; margin:0 auto; padding:40px 20px 80px; }
+  header { text-align:center; margin-bottom:44px; animation:fadeDown 1s ease; }
+  .logo-icon { font-size:4rem; display:block; margin-bottom:10px; animation:floatY 4s ease-in-out infinite; }
+  @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  h1 {
+    font-size:clamp(2rem,5vw,3.5rem); font-weight:900; color:var(--forest);
+    text-shadow:2px 3px 0 rgba(255,255,255,0.8); line-height:1.2; margin-bottom:8px;
+  }
+  .subtitle { color:var(--dusk); font-size:1.1rem; opacity:0.85; }
+  .card {
+    background:rgba(255,255,255,0.87); backdrop-filter:blur(20px); border-radius:32px; padding:40px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.1),0 0 0 1px rgba(255,255,255,0.6),inset 0 1px 0 rgba(255,255,255,0.9);
+    animation:fadeUp 1s ease 0.2s both;
+  }
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-30px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeUp   { from{opacity:0;transform:translateY(30px)}  to{opacity:1;transform:translateY(0)} }
+  .upload-zone {
+    border:3px dashed var(--sky); border-radius:24px; padding:50px 30px; text-align:center;
+    cursor:pointer; transition:all 0.3s ease;
+    background:linear-gradient(135deg,rgba(168,216,234,0.1),rgba(127,191,123,0.1));
+  }
+  .upload-zone:hover,.upload-zone.drag-over {
+    border-color:var(--soft-green);
+    background:linear-gradient(135deg,rgba(168,216,234,0.25),rgba(127,191,123,0.2));
+    transform:scale(1.01);
+  }
+  .upload-zone input{display:none}
+  .upload-icon{font-size:3.5rem;margin-bottom:15px;display:block}
+  .upload-text{font-size:1.15rem;color:var(--forest);font-weight:600;margin-bottom:6px}
+  .upload-hint{font-size:0.9rem;color:#888}
+  .previews { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:28px; }
+  @media(max-width:600px){ .previews{grid-template-columns:1fr} }
+  .preview-box {
+    border-radius:20px; overflow:hidden; background:#f0f4f8;
+    aspect-ratio:4/3; display:flex; align-items:center; justify-content:center;
+    position:relative; box-shadow:0 4px 20px rgba(0,0,0,0.08);
+  }
+  .preview-box img { width:100%; height:100%; object-fit:cover; display:block; }
+  .preview-label {
+    position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.55);
+    color:white; padding:4px 12px; border-radius:20px; font-size:0.8rem; backdrop-filter:blur(8px);
+  }
+  .preview-empty { color:#ccc; font-size:2.5rem; flex-direction:column; display:flex; align-items:center; gap:8px; }
+  .preview-empty span { font-size:0.85rem; color:#bbb; }
+  .style-section { margin-top:28px; }
+  .style-section > p { font-weight:700; color:var(--forest); margin-bottom:12px; font-size:1rem; }
+  .style-chips { display:flex; flex-wrap:wrap; gap:10px; }
+  .chip {
+    padding:8px 18px; border-radius:50px; border:2px solid var(--sky); background:white;
+    color:var(--ink); cursor:pointer; font-family:'Tajawal',sans-serif;
+    font-size:0.9rem; font-weight:500; transition:all 0.25s;
+  }
+  .chip:hover { border-color:var(--soft-green); transform:translateY(-2px); }
+  .chip.active {
+    background:var(--forest); border-color:var(--forest); color:white;
+    box-shadow:0 4px 12px rgba(45,106,79,0.3);
+  }
+  .btn-convert {
+    margin-top:28px; width:100%; padding:18px;
+    background:linear-gradient(135deg,var(--forest),var(--soft-green));
+    color:white; border:none; border-radius:20px; font-family:'Tajawal',sans-serif;
+    font-size:1.25rem; font-weight:700; cursor:pointer; transition:all 0.3s ease;
+    box-shadow:0 8px 25px rgba(45,106,79,0.35); position:relative; overflow:hidden;
+  }
+  .btn-convert::before {
+    content:''; position:absolute; top:-50%; left:-60%; width:40%; height:200%;
+    background:rgba(255,255,255,0.2); transform:skewX(-20deg); transition:left 0.5s ease;
+  }
+  .btn-convert:hover::before{left:120%}
+  .btn-convert:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(45,106,79,0.45)}
+  .btn-convert:disabled{background:#ccc;box-shadow:none;cursor:not-allowed;transform:none}
+  .loading{display:none;text-align:center;margin-top:28px;padding:28px}
+  .loading.show{display:block}
+  .spinner{width:60px;height:60px;margin:0 auto 18px;position:relative}
+  .spinner::before,.spinner::after{content:'';position:absolute;border-radius:50%;border:4px solid transparent}
+  .spinner::before{inset:0;border-top-color:var(--forest);animation:spin 1s linear infinite}
+  .spinner::after{inset:8px;border-top-color:var(--golden);animation:spin 0.7s linear infinite reverse}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-text{color:var(--forest);font-size:1.05rem;font-weight:600;animation:pulse 1.5s ease-in-out infinite}
+  .loading-sub{color:#888;font-size:0.85rem;margin-top:8px}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+  .result-section{display:none;margin-top:28px}
+  .result-section.show{display:block;animation:fadeUp 0.5s ease}
+  .result-image-wrap{border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.15)}
+  .result-image-wrap img{width:100%;display:block}
+  .result-actions{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
+  .btn-action{flex:1;min-width:120px;padding:14px 20px;border-radius:16px;border:none;font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.25s}
+  .btn-download{background:var(--golden);color:white;box-shadow:0 4px 15px rgba(232,168,56,0.4)}
+  .btn-download:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(232,168,56,0.5)}
+  .btn-reset{background:#f0f4f8;color:var(--ink)}
+  .btn-reset:hover{background:#e0e8f0}
+  .desc-card {
+    background:linear-gradient(135deg,rgba(168,216,234,0.2),rgba(127,191,123,0.15));
+    border:2px solid rgba(127,191,123,0.45); border-radius:20px; padding:24px; margin-top:20px;
+  }
+  .desc-card h3{color:var(--forest);font-size:1.05rem;margin-bottom:12px;font-weight:700}
+  .desc-card p{color:#444;font-size:0.95rem;line-height:1.95;direction:rtl}
+  .style-badge {
+    display:inline-block; background:rgba(45,106,79,0.12); color:var(--forest);
+    border-radius:20px; padding:3px 14px; font-size:0.82rem; font-weight:700; margin-bottom:14px;
+  }
+</style>
+</head>
+<body>
 
-const STYLE_PROMPTS = {
-  "ghibli-classic": {
-    label: "جيبلي كلاسيك",
-    emoji: "🌿",
-    prompt: "Analyze this image and describe it completely reimagined in Studio Ghibli classic style by Hayao Miyazaki. Describe soft watercolor textures, warm earthy tones, lush greens and sky blues, hand-drawn aesthetic, gentle lighting, detailed natural backgrounds with flowing grass and tall trees, whimsical characters with large expressive eyes."
+<div class="sky-bg"></div>
+<div class="cloud cloud-1"></div>
+<div class="cloud cloud-2"></div>
+<div class="cloud cloud-3"></div>
+<div class="deco-tree left">🌲</div>
+<div class="deco-tree right">🌳</div>
+
+<div class="container">
+  <header>
+    <span class="logo-icon">🐱</span>
+    <h1>زبي جيبلي السحري</h1>
+    <p class="subtitle">حوّل صورتك إلى لوحة فنية بأسلوب استوديو جيبلي ✨</p>
+  </header>
+
+  <div class="card">
+
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept="image/*">
+      <span class="upload-icon">🖼️</span>
+      <p class="upload-text">اسحب صورتك هنا أو انقر للاختيار</p>
+      <p class="upload-hint">PNG، JPG، WEBP — حتى 10MB</p>
+    </div>
+
+    <div class="previews" id="previews" style="display:none;">
+      <div class="preview-box" id="originalBox">
+        <div class="preview-empty">🖼️<span>الأصلية</span></div>
+        <span class="preview-label">الصورة الأصلية</span>
+      </div>
+      <div class="preview-box" id="resultBox">
+        <div class="preview-empty">✨<span>النتيجة</span></div>
+        <span class="preview-label" id="resultLabel">النتيجة</span>
+      </div>
+    </div>
+
+    <div class="style-section">
+      <p>🎨 اختر نمط جيبلي:</p>
+      <div class="style-chips">
+        <button class="chip active" data-style="classic">🌿 جيبلي كلاسيك</button>
+        <button class="chip" data-style="spirited">🏮 الرحلة السحرية</button>
+        <button class="chip" data-style="totoro">🐾 توتورو</button>
+        <button class="chip" data-style="mononoke">🐺 الأميرة مونونوكي</button>
+        <button class="chip" data-style="howl">🏰 قلعة هاول</button>
+        <button class="chip" data-style="nausicaa">🌬️ نوسيكاا</button>
+      </div>
+    </div>
+
+    <button class="btn-convert" id="convertBtn" disabled>🌸 حوّل الصورة الآن</button>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p class="loading-text">جارٍ نسج السحر... 🌿</p>
+      <p class="loading-sub" id="loadingMsg">تحليل الصورة...</p>
+    </div>
+
+    <div class="result-section" id="resultSection">
+      <div class="result-image-wrap">
+        <img id="resultImg" src="" alt="نتيجة جيبلي">
+      </div>
+      <div class="desc-card" id="descCard" style="display:none">
+        <span class="style-badge" id="styleBadge"></span>
+        <h3>🌸 وصف الصورة المحوّلة:</h3>
+        <p id="descText"></p>
+      </div>
+      <div class="result-actions">
+        <button class="btn-action btn-reset" id="resetBtn">🔄 صورة جديدة</button>
+        <button class="btn-action btn-download" id="downloadBtn">⬇️ تحميل الصورة</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const STYLES = {
+  classic: {
+    label: '🌿 جيبلي كلاسيك',
+    desc: 'تتحوّل الصورة إلى لوحة بأسلوب ميازاكي الكلاسيكي؛ ألوان دافئة من الأخضر الزمردي والسماء الزرقاء الرقيقة، مع ملامس تشبه الألوان المائية. تمتزج الطبيعة والضوء الناعم في مشهد يوحي بالسكينة والدهشة معاً.',
+    filter: (r,g,b) => ({ r:clamp(r*0.93+12), g:clamp(g*1.12+8), b:clamp(b*1.06+10) }),
+    overlay: 'rgba(200,240,200,0.12)',
+    vignette: 'rgba(60,120,60,0.18)'
   },
-  "spirited-away": {
-    label: "الرحلة السحرية",
-    emoji: "🏮",
-    prompt: "Analyze this image reimagined in Spirited Away (Sen to Chihiro) style. Describe vibrant colors, detailed Japanese bathhouse or magical realm architecture, mystical spirits and supernatural beings, warm lantern lighting, rich layered backgrounds, mysterious yet cozy atmosphere."
+  spirited: {
+    label: '🏮 الرحلة السحرية',
+    desc: 'تتجلّى الصورة بألوان عميقة ومشبعة تذكّر بعالم حمّامات الأرواح السحرية. تتوهّج الأضواء الذهبية والبرتقالية كأنها فوانيس معلّقة في ليل ياباني، بينما تكسو التفاصيل الدقيقة كل ركن بسحر خفي.',
+    filter: (r,g,b) => ({ r:clamp(r*1.15+20), g:clamp(g*0.88+10), b:clamp(b*0.72) }),
+    overlay: 'rgba(255,160,60,0.10)',
+    vignette: 'rgba(120,40,0,0.25)'
   },
-  "totoro": {
-    label: "توتورو",
-    emoji: "🐾",
-    prompt: "Reimagine this image in My Neighbor Totoro style. Describe soft pastel colors, lush Japanese countryside, giant camphor trees, cozy rural 1950s Japan atmosphere, gentle warm sunlight filtering through leaves, whimsical forest spirits, nostalgic innocent mood."
+  totoro: {
+    label: '🐾 توتورو',
+    desc: 'تتلوّن الصورة بأعشاب ريفية يابانية وسماء باستيل هادئة. يسود مزاج الخمسينيات الريفي الدافئ، مع تدرّجات خضراء عشبية وإضاءة شمسية ناعمة كأنها نسيج من ذكرى طفولة بريئة.',
+    filter: (r,g,b) => ({ r:clamp(r*0.96+18), g:clamp(g*1.14+12), b:clamp(b*0.90+8) }),
+    overlay: 'rgba(180,230,160,0.14)',
+    vignette: 'rgba(40,100,40,0.15)'
   },
-  "mononoke": {
-    label: "الأميرة مونونوكي",
-    emoji: "🐺",
-    prompt: "Transform this into Princess Mononoke Studio Ghibli style. Describe ancient primeval forest, shimmering kodama tree spirits, dramatic contrast between nature and industry, deep forest greens and misty blues, intense emotional atmosphere, wild untamed beauty."
+  mononoke: {
+    label: '🐺 الأميرة مونونوكي',
+    desc: 'تتجلّى الصورة بألوان الغابات القديمة؛ أخضر عميق وأزرق معتم يتخلّله بريق أرواح الأشجار الصغيرة. تفوح منها رائحة الطين والمطر، وتُغلّفها هالة من الصراع الأبدي بين الطبيعة والإنسان.',
+    filter: (r,g,b) => ({ r:clamp(r*0.80+5), g:clamp(g*1.05+8), b:clamp(b*0.95+15) }),
+    overlay: 'rgba(30,80,50,0.18)',
+    vignette: 'rgba(10,40,20,0.35)'
   },
-  "howl": {
-    label: "قلعة هاول",
-    emoji: "🏰",
-    prompt: "Reimagine in Howl's Moving Castle style. Describe European fantasy steampunk setting, warm golden amber tones, magical mechanical contraptions, cobblestone streets, flower-filled meadows, romantic dreamy quality, moving castle in the distance with smoke and steam."
+  howl: {
+    label: '🏰 قلعة هاول',
+    desc: 'تكتسب الصورة نبرة أوروبية خيالية دافئة؛ درجات العسل والكهرمان تغمر كل تفصيل. تبدو الأجواء كأنها مستلّة من رواية رومانسية عتيقة، حيث يلتقي البخار والسحر في عالم يجمع بين الحنين والدهشة.',
+    filter: (r,g,b) => ({ r:clamp(r*1.18+22), g:clamp(g*1.02+8), b:clamp(b*0.70-5) }),
+    overlay: 'rgba(255,200,80,0.13)',
+    vignette: 'rgba(100,50,0,0.22)'
   },
-  "nausicaa": {
-    label: "نوسيكاا",
-    emoji: "🌬️",
-    prompt: "Transform into Nausicaä of the Valley of the Wind style. Describe vast open skies with wind currents, bioluminescent toxic jungle, flying machines gliding on air currents, soft blues and greens, hopeful post-apocalyptic beauty, flowing scarves and hair in the breeze."
+  nausicaa: {
+    label: '🌬️ نوسيكاا',
+    desc: 'تنفتح الصورة على سماوات شاسعة يجتاحها الريح والأمل. تيمن الألوان الزرقاء الفيروزية والخضراء الباردة كل زاوية، بينما تهبّ نسمة خفية تُحرّك الأوشحة والأعشاب في مشهد ما بعد نهاية العالم الجميلة.',
+    filter: (r,g,b) => ({ r:clamp(r*0.82+8), g:clamp(g*1.06+14), b:clamp(b*1.22+20) }),
+    overlay: 'rgba(100,200,220,0.12)',
+    vignette: 'rgba(0,60,100,0.20)'
   }
 };
 
 const LOADING_MSGS = [
-  "🔍 تحليل الصورة...",
-  "🎨 مزج ألوان جيبلي...",
-  "✏️ رسم الخطوط...",
-  "🌿 إضافة الطبيعة...",
-  "☁️ رسم الغيوم...",
-  "✨ اللمسات الأخيرة..."
+  'تحليل الصورة... 🔍','مزج ألوان جيبلي... 🎨','رسم الخطوط... ✏️',
+  'إضافة روح الطبيعة... 🌿','تلوين الغيوم... ☁️','اللمسات الأخيرة... 🌸'
 ];
 
-export default function GhibliConverter() {
-  const [image, setImage] = useState(null);
-  const [imageBase64, setImageBase64] = useState(null);
-  const [imageMime, setImageMime] = useState(null);
-  const [selectedStyle, setSelectedStyle] = useState("ghibli-classic");
-  const [customDesc, setCustomDesc] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
-  const [dragOver, setDragOver] = useState(false);
-  const fileRef = useRef();
-  const intervalRef = useRef();
+function clamp(v){ return Math.max(0,Math.min(255,Math.round(v))); }
 
-  const handleFile = useCallback((file) => {
-    if (!file || !file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setImage(e.target.result);
-      setImageBase64(e.target.result.split(",")[1]);
-      setImageMime(file.type);
-      setResult(null);
-      setError(null);
-    };
-    reader.readAsDataURL(file);
-  }, []);
+let uploadedFile=null, selectedStyle='classic', resultDataUrl=null, msgInterval=null;
 
-  const onDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-    handleFile(e.dataTransfer.files[0]);
+const uploadZone=document.getElementById('uploadZone');
+const fileInput=document.getElementById('fileInput');
+const convertBtn=document.getElementById('convertBtn');
+
+uploadZone.addEventListener('click',()=>fileInput.click());
+uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.classList.add('drag-over');});
+uploadZone.addEventListener('dragleave',()=>uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop',e=>{
+  e.preventDefault();uploadZone.classList.remove('drag-over');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type.startsWith('image/'))handleFile(f);
+});
+fileInput.addEventListener('change',()=>{if(fileInput.files[0])handleFile(fileInput.files[0]);});
+
+function handleFile(file){
+  uploadedFile=file;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const box=document.getElementById('originalBox');
+    box.querySelector('.preview-empty')?.remove();
+    box.querySelector('img')?.remove();
+    const img=document.createElement('img');
+    img.src=e.target.result;
+    box.insertBefore(img,box.querySelector('.preview-label'));
+    document.getElementById('previews').style.display='grid';
+    uploadZone.style.display='none';
+    convertBtn.disabled=false;
+    document.getElementById('resultSection').classList.remove('show');
   };
-
-  const convert = async () => {
-    if (!imageBase64) return;
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    setLoadingMsgIdx(0);
-
-    intervalRef.current = setInterval(() => {
-      setLoadingMsgIdx(p => (p + 1) % LOADING_MSGS.length);
-    }, 1800);
-
-    try {
-      const style = STYLE_PROMPTS[selectedStyle];
-      const prompt = `${style.prompt}${customDesc ? `\n\nطلب إضافي: ${customDesc}` : ""}
-
-بعد التحليل، قدّم وصفاً فنياً شاملاً باللغة العربية (فقرتين إلى ثلاث) يصف كيف ستبدو هذه الصورة بأسلوب جيبلي المختار. كن تفصيلياً وشاعرياً في وصف:
-- الشخصيات أو العناصر الرئيسية
-- البيئة والخلفية  
-- الألوان والإضاءة
-- المشاعر والأجواء
-- التفاصيل الخاصة بأسلوب جيبلي
-
-ابدأ الوصف مباشرة بدون مقدمة.`;
-
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [{
-            role: "user",
-            content: [
-              { type: "image", source: { type: "base64", media_type: imageMime, data: imageBase64 } },
-              { type: "text", text: prompt }
-            ]
-          }]
-        })
-      });
-
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
-      const text = data.content.map(c => c.text || "").join("\n").trim();
-      setResult(text);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      clearInterval(intervalRef.current);
-      setLoading(false);
-    }
-  };
-
-  const reset = () => {
-    setImage(null); setImageBase64(null); setImageMime(null);
-    setResult(null); setError(null); setCustomDesc("");
-  };
-
-  return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(180deg, #b8d4f0 0%, #cde8f5 35%, #ddf5e8 100%)",
-      fontFamily: "'Segoe UI', Tahoma, sans-serif",
-      direction: "rtl",
-      position: "relative",
-      overflow: "hidden"
-    }}>
-      {/* Animated clouds */}
-      {[
-        { top: "8%", width: 140, dur: 38, delay: 0, opacity: 0.75 },
-        { top: "18%", width: 90, dur: 52, delay: -18, opacity: 0.5 },
-        { top: "5%", width: 180, dur: 65, delay: -35, opacity: 0.6 },
-      ].map((c, i) => (
-        <div key={i} style={{
-          position: "fixed", top: c.top, width: c.width, height: c.width * 0.3,
-          background: "white", borderRadius: 999, opacity: c.opacity,
-          animation: `cloudMove ${c.dur}s linear infinite`,
-          animationDelay: `${c.delay}s`,
-          zIndex: 1,
-          boxShadow: "0 4px 20px rgba(255,255,255,0.5)"
-        }} />
-      ))}
-
-      <style>{`
-        @keyframes cloudMove { from { transform: translateX(-220px); } to { transform: translateX(110vw); } }
-        @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes spinRev { to { transform: rotate(-360deg); } }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes shimmer { 0%,100%{opacity:0.6} 50%{opacity:1} }
-      `}</style>
-
-      {/* Fixed trees */}
-      <div style={{ position: "fixed", bottom: 0, left: "1%", fontSize: "5rem", zIndex: 2, lineHeight: 1, filter: "drop-shadow(0 0 8px rgba(0,0,0,0.1))" }}>🌲</div>
-      <div style={{ position: "fixed", bottom: 0, right: "1%", fontSize: "5.5rem", zIndex: 2, lineHeight: 1, filter: "drop-shadow(0 0 8px rgba(0,0,0,0.1))" }}>🌳</div>
-      <div style={{ position: "fixed", bottom: 0, left: "8%", fontSize: "3.5rem", zIndex: 2, lineHeight: 1, opacity: 0.7 }}>🌿</div>
-      <div style={{ position: "fixed", bottom: 0, right: "8%", fontSize: "3.5rem", zIndex: 2, lineHeight: 1, opacity: 0.7 }}>🌿</div>
-
-      {/* Main content */}
-      <div style={{ position: "relative", zIndex: 10, maxWidth: 820, margin: "0 auto", padding: "36px 20px 100px" }}>
-
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 42, animation: "fadeUp 0.9s ease" }}>
-          <div style={{ fontSize: "4rem", animation: "floatY 4s ease-in-out infinite", display: "block", marginBottom: 8 }}>🐱</div>
-          <h1 style={{
-            fontSize: "clamp(1.8rem,5vw,3rem)", fontWeight: 900,
-            color: "#1a4a2e",
-            textShadow: "2px 3px 0 rgba(255,255,255,0.8), 0 0 30px rgba(127,191,123,0.3)",
-            margin: "0 0 8px"
-          }}>محوّل جيبلي السحري</h1>
-          <p style={{ color: "#5a7a6a", fontSize: "1.05rem", fontWeight: 500 }}>
-            حوّل صورتك إلى لوحة فنية بأسلوب استوديو جيبلي ✨
-          </p>
-        </div>
-
-        {/* Card */}
-        <div style={{
-          background: "rgba(255,255,255,0.88)",
-          backdropFilter: "blur(24px)",
-          borderRadius: 32,
-          padding: "clamp(24px,5vw,44px)",
-          boxShadow: "0 24px 70px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.7)",
-          animation: "fadeUp 0.9s ease 0.15s both"
-        }}>
-
-          {/* Upload / Preview */}
-          {!image ? (
-            <div
-              onClick={() => fileRef.current.click()}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={onDrop}
-              style={{
-                border: `3px dashed ${dragOver ? "#7fbf7b" : "#a8d8ea"}`,
-                borderRadius: 24, padding: "52px 28px", textAlign: "center",
-                cursor: "pointer",
-                background: dragOver
-                  ? "linear-gradient(135deg,rgba(127,191,123,0.18),rgba(168,216,234,0.2))"
-                  : "linear-gradient(135deg,rgba(168,216,234,0.1),rgba(127,191,123,0.08))",
-                transition: "all 0.3s ease",
-                transform: dragOver ? "scale(1.015)" : "scale(1)"
-              }}
-            >
-              <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }}
-                onChange={e => handleFile(e.target.files[0])} />
-              <div style={{ fontSize: "3.5rem", marginBottom: 14 }}>🖼️</div>
-              <p style={{ fontSize: "1.15rem", fontWeight: 700, color: "#2d6a4f", marginBottom: 6 }}>
-                اسحب صورتك هنا أو انقر للاختيار
-              </p>
-              <p style={{ fontSize: "0.88rem", color: "#888" }}>PNG، JPG، WEBP</p>
-            </div>
-          ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-              {/* Original */}
-              <div style={{ borderRadius: 18, overflow: "hidden", aspectRatio: "4/3", position: "relative", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
-                <img src={image} alt="original" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                <div style={{
-                  position: "absolute", bottom: 10, right: 10,
-                  background: "rgba(0,0,0,0.55)", color: "white",
-                  padding: "4px 12px", borderRadius: 20, fontSize: "0.78rem", backdropFilter: "blur(8px)"
-                }}>الأصلية</div>
-              </div>
-              {/* Result */}
-              <div style={{
-                borderRadius: 18, overflow: "hidden", aspectRatio: "4/3",
-                background: result ? "transparent" : "linear-gradient(135deg,#e8f4f8,#eef8e8)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                position: "relative", boxShadow: "0 4px 20px rgba(0,0,0,0.08)"
-              }}>
-                {loading ? (
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{ position: "relative", width: 56, height: 56, margin: "0 auto 14px" }}>
-                      <div style={{
-                        position: "absolute", inset: 0, borderRadius: "50%",
-                        border: "4px solid transparent", borderTopColor: "#2d6a4f",
-                        animation: "spin 1s linear infinite"
-                      }} />
-                      <div style={{
-                        position: "absolute", inset: 8, borderRadius: "50%",
-                        border: "4px solid transparent", borderTopColor: "#e8a838",
-                        animation: "spinRev 0.7s linear infinite"
-                      }} />
-                    </div>
-                    <p style={{ color: "#2d6a4f", fontWeight: 700, fontSize: "0.9rem", animation: "shimmer 1.5s ease infinite" }}>
-                      {LOADING_MSGS[loadingMsgIdx]}
-                    </p>
-                  </div>
-                ) : result ? (
-                  <>
-                    <img src={image} alt="ghibli" style={{
-                      width: "100%", height: "100%", objectFit: "cover",
-                      filter: "saturate(1.3) brightness(1.05) hue-rotate(5deg) contrast(0.95)"
-                    }} />
-                    <div style={{
-                      position: "absolute", inset: 0,
-                      background: "linear-gradient(135deg, rgba(100,180,120,0.15), rgba(100,160,220,0.1))",
-                      mixBlendMode: "soft-light"
-                    }} />
-                    <div style={{
-                      position: "absolute", bottom: 10, right: 10,
-                      background: "rgba(45,106,79,0.75)", color: "white",
-                      padding: "4px 12px", borderRadius: 20, fontSize: "0.78rem", backdropFilter: "blur(8px)"
-                    }}>✨ جيبلي</div>
-                  </>
-                ) : (
-                  <div style={{ textAlign: "center", color: "#ccc" }}>
-                    <div style={{ fontSize: "2.5rem" }}>✨</div>
-                    <p style={{ fontSize: "0.82rem", marginTop: 6, color: "#bbb" }}>النتيجة</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Style chips */}
-          <div style={{ marginTop: 28 }}>
-            <p style={{ fontWeight: 700, color: "#2d6a4f", marginBottom: 12, fontSize: "0.98rem" }}>🎨 اختر نمط جيبلي:</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-              {Object.entries(STYLE_PROMPTS).map(([key, s]) => (
-                <button key={key} onClick={() => setSelectedStyle(key)} style={{
-                  padding: "8px 18px", borderRadius: 50,
-                  border: `2px solid ${selectedStyle === key ? "#2d6a4f" : "#a8d8ea"}`,
-                  background: selectedStyle === key ? "#2d6a4f" : "white",
-                  color: selectedStyle === key ? "white" : "#1a1a2e",
-                  cursor: "pointer", fontFamily: "inherit", fontSize: "0.9rem", fontWeight: 600,
-                  transition: "all 0.22s",
-                  boxShadow: selectedStyle === key ? "0 4px 14px rgba(45,106,79,0.35)" : "none",
-                  transform: selectedStyle === key ? "translateY(-2px)" : "none"
-                }}>
-                  {s.emoji} {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Custom description */}
-          <div style={{ marginTop: 22 }}>
-            <p style={{ fontWeight: 700, color: "#2d6a4f", marginBottom: 10, fontSize: "0.98rem" }}>✍️ وصف إضافي (اختياري):</p>
-            <textarea
-              value={customDesc}
-              onChange={e => setCustomDesc(e.target.value)}
-              placeholder="مثال: أضف غروب شمس جميل، شخصيات أرواح صغيرة، مطر خفيف..."
-              style={{
-                width: "100%", padding: "14px 18px",
-                border: "2px solid #a8d8ea", borderRadius: 16,
-                fontFamily: "inherit", fontSize: "0.93rem", color: "#1a1a2e",
-                background: "rgba(255,255,255,0.8)", resize: "vertical",
-                minHeight: 80, outline: "none", direction: "rtl",
-                transition: "border-color 0.25s", boxSizing: "border-box"
-              }}
-              onFocus={e => e.target.style.borderColor = "#7fbf7b"}
-              onBlur={e => e.target.style.borderColor = "#a8d8ea"}
-            />
-          </div>
-
-          {/* Convert button */}
-          <button
-            onClick={convert}
-            disabled={!image || loading}
-            style={{
-              marginTop: 24, width: "100%", padding: "18px",
-              background: (!image || loading) ? "#ccc" : "linear-gradient(135deg, #2d6a4f, #7fbf7b)",
-              color: "white", border: "none", borderRadius: 20,
-              fontFamily: "inherit", fontSize: "1.2rem", fontWeight: 700,
-              cursor: (!image || loading) ? "not-allowed" : "pointer",
-              boxShadow: (!image || loading) ? "none" : "0 8px 28px rgba(45,106,79,0.38)",
-              transition: "all 0.3s ease",
-              transform: (!image || loading) ? "none" : "translateY(0)"
-            }}
-            onMouseEnter={e => { if (image && !loading) e.target.style.transform = "translateY(-3px)"; }}
-            onMouseLeave={e => { e.target.style.transform = "none"; }}
-          >
-            {loading ? "🌸 جارٍ نسج السحر..." : "🌸 حوّل الصورة الآن"}
-          </button>
-
-          {/* Error */}
-          {error && (
-            <div style={{
-              marginTop: 18, padding: "14px 20px",
-              background: "#fff0f0", border: "2px solid #ffcdd2",
-              borderRadius: 16, color: "#c62828", textAlign: "center", fontSize: "0.93rem"
-            }}>
-              ⚠️ {error}
-            </div>
-          )}
-
-          {/* Result description */}
-          {result && (
-            <div style={{
-              marginTop: 24, padding: 26,
-              background: "linear-gradient(135deg,rgba(168,216,234,0.2),rgba(127,191,123,0.15))",
-              border: "2px solid rgba(127,191,123,0.45)",
-              borderRadius: 20, animation: "fadeUp 0.6s ease"
-            }}>
-              <p style={{ fontWeight: 800, color: "#2d6a4f", fontSize: "1rem", marginBottom: 12 }}>
-                🌸 وصف الصورة المحوّلة بأسلوب {STYLE_PROMPTS[selectedStyle].label}:
-              </p>
-              <p style={{ color: "#3a4a3a", lineHeight: 2, fontSize: "0.97rem", direction: "rtl" }}>
-                {result}
-              </p>
-              <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
-                <button
-                  onClick={reset}
-                  style={{
-                    flex: 1, padding: "12px", borderRadius: 16, border: "none",
-                    background: "#f0f4f8", color: "#1a1a2e",
-                    fontFamily: "inherit", fontSize: "0.98rem", fontWeight: 600, cursor: "pointer"
-                  }}
-                >🔄 صورة جديدة</button>
-                <button
-                  onClick={() => {
-                    const a = document.createElement("a");
-                    a.href = image; a.download = "ghibli-art.jpg"; a.click();
-                  }}
-                  style={{
-                    flex: 1, padding: "12px", borderRadius: 16, border: "none",
-                    background: "#e8a838", color: "white",
-                    fontFamily: "inherit", fontSize: "0.98rem", fontWeight: 700, cursor: "pointer",
-                    boxShadow: "0 4px 14px rgba(232,168,56,0.4)"
-                  }}
-                >⬇️ تحميل الصورة</button>
-              </div>
-            </div>
-          )}
-
-          {/* Reset when image loaded but no result */}
-          {image && !result && !loading && (
-            <p
-              onClick={reset}
-              style={{ textAlign: "center", marginTop: 14, color: "#888", cursor: "pointer", fontSize: "0.88rem" }}
-            >
-              ← اختر صورة مختلفة
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  reader.readAsDataURL(file);
 }
+
+document.querySelectorAll('.chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    selectedStyle=chip.dataset.style;
+  });
+});
+
+convertBtn.addEventListener('click',()=>{
+  if(!uploadedFile)return;
+  convertBtn.disabled=true;
+  document.getElementById('resultSection').classList.remove('show');
+  document.getElementById('loading').classList.add('show');
+  let idx=0;
+  msgInterval=setInterval(()=>{
+    document.getElementById('loadingMsg').textContent=LOADING_MSGS[idx++%LOADING_MSGS.length];
+  },1800);
+  setTimeout(applyGhibliFilter,80);
+});
+
+function applyGhibliFilter(){
+  const style=STYLES[selectedStyle];
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const MAX=1600;
+      let w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+      if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+      canvas.width=w;canvas.height=h;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+
+      // Pixel color grading
+      const id=ctx.getImageData(0,0,w,h);
+      const d=id.data;
+      for(let i=0;i<d.length;i+=4){
+        const res=style.filter(d[i],d[i+1],d[i+2]);
+        d[i]=res.r; d[i+1]=res.g; d[i+2]=res.b;
+      }
+      ctx.putImageData(id,0,0);
+
+      // Soft-light overlay
+      ctx.globalCompositeOperation='soft-light';
+      const grd=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*0.75);
+      grd.addColorStop(0,style.overlay);
+      grd.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle=grd;ctx.fillRect(0,0,w,h);
+
+      // Vignette
+      ctx.globalCompositeOperation='multiply';
+      const vig=ctx.createRadialGradient(w/2,h/2,Math.min(w,h)*0.35,w/2,h/2,Math.max(w,h)*0.75);
+      vig.addColorStop(0,'rgba(255,255,255,1)');
+      vig.addColorStop(1,style.vignette);
+      ctx.fillStyle=vig;ctx.fillRect(0,0,w,h);
+
+      // Grain (hand-drawn feel)
+      const gc=document.createElement('canvas');
+      gc.width=w;gc.height=h;
+      const gctx=gc.getContext('2d');
+      const gd=gctx.createImageData(w,h);
+      for(let i=0;i<gd.data.length;i+=4){
+        const v=Math.random()*18;
+        gd.data[i]=gd.data[i+1]=gd.data[i+2]=v;gd.data[i+3]=255;
+      }
+      gctx.putImageData(gd,0,0);
+      ctx.globalCompositeOperation='screen';
+      ctx.globalAlpha=0.055;
+      ctx.drawImage(gc,0,0);
+      ctx.globalCompositeOperation='source-over';
+      ctx.globalAlpha=1;
+
+      resultDataUrl=canvas.toDataURL('image/jpeg',0.93);
+
+      // Update preview box
+      const box=document.getElementById('resultBox');
+      box.querySelector('.preview-empty')?.remove();
+      box.querySelector('img')?.remove();
+      const rImg=document.createElement('img');
+      rImg.src=resultDataUrl;
+      box.insertBefore(rImg,box.querySelector('.preview-label'));
+      document.getElementById('resultLabel').textContent=style.label;
+
+      // Show result section
+      document.getElementById('resultImg').src=resultDataUrl;
+      document.getElementById('styleBadge').textContent=style.label;
+      document.getElementById('descText').textContent=style.desc;
+      document.getElementById('descCard').style.display='block';
+
+      clearInterval(msgInterval);
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('resultSection').classList.add('show');
+      convertBtn.disabled=false;
+      document.getElementById('resultSection').scrollIntoView({behavior:'smooth',block:'nearest'});
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(uploadedFile);
+}
+
+document.getElementById('downloadBtn').addEventListener('click',()=>{
+  if(!resultDataUrl)return;
+  const a=document.createElement('a');
+  a.href=resultDataUrl;a.download=`ghibli-${selectedStyle}.jpg`;a.click();
+});
+
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  uploadedFile=null;resultDataUrl=null;fileInput.value='';
+  document.getElementById('previews').style.display='none';
+  uploadZone.style.display='block';
+  document.getElementById('resultSection').classList.remove('show');
+  document.getElementById('loading').classList.remove('show');
+  convertBtn.disabled=true;
+  document.getElementById('originalBox').innerHTML='<div class="preview-empty">🖼️<span>الأصلية</span></div><span class="preview-label">الصورة الأصلية</span>';
+  document.getElementById('resultBox').innerHTML='<div class="preview-empty">✨<span>النتيجة</span></div><span class="preview-label" id="resultLabel">النتيجة</span>';
+});
+</script>
+</body>
+</html>
