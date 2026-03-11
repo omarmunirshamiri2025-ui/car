@@ -3,432 +3,1062 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>محوّل جيبلي السحري</title>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<title>تطبيقاتي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --sky: #a8d8ea;
-    --soft-green: #7fbf7b;
-    --golden: #e8a838;
-    --forest: #2d6a4f;
-    --dusk: #6b4c8a;
-    --ink: #1a1a2e;
+    --bg: #0a0a0f;
+    --card: #13131a;
+    --card2: #1a1a24;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --text: #f0f0f8;
+    --muted: #7a7a9a;
+    --border: #2a2a3a;
+    --glow: rgba(108,99,255,0.25);
   }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
   body {
-    font-family: 'Tajawal', sans-serif;
-    background: #e8f4f8;
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
   }
-  .sky-bg {
-    position: fixed; inset: 0; z-index: 0;
-    background: linear-gradient(180deg,#b8d4f0 0%,#c9e4f5 30%,#ddf0f8 60%,#eef8e8 100%);
+
+  /* Background mesh */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(255,101,132,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(67,233,123,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
   }
-  .cloud {
-    position: fixed; background: white; border-radius: 50px;
-    opacity: 0.7; animation: floatCloud linear infinite; z-index: 1;
+
+  /* ===== HEADER ===== */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    background: rgba(10,10,15,0.8);
+    position: sticky;
+    top: 0;
   }
-  .cloud::before,.cloud::after { content:''; position:absolute; background:white; border-radius:50%; }
-  .cloud-1 { width:120px;height:40px;top:10%;animation-duration:35s; }
-  .cloud-1::before { width:60px;height:60px;top:-30px;right:20px; }
-  .cloud-1::after  { width:40px;height:40px;top:-20px;right:55px; }
-  .cloud-2 { width:90px;height:30px;top:20%;animation-duration:45s;animation-delay:-15s;opacity:0.5; }
-  .cloud-2::before { width:45px;height:45px;top:-22px;right:15px; }
-  .cloud-2::after  { width:30px;height:30px;top:-15px;right:40px; }
-  .cloud-3 { width:150px;height:50px;top:8%;animation-duration:55s;animation-delay:-30s;opacity:0.6; }
-  .cloud-3::before { width:70px;height:70px;top:-35px;right:25px; }
-  .cloud-3::after  { width:50px;height:50px;top:-25px;right:65px; }
-  @keyframes floatCloud { from{transform:translateX(-200px)} to{transform:translateX(calc(100vw + 200px))} }
-  .deco-tree {
-    position:fixed; bottom:0; z-index:2; pointer-events:none;
-    font-size:6rem; filter:drop-shadow(2px 0 10px rgba(0,0,0,0.1));
-    animation: treeWay 8s ease-in-out infinite;
+
+  .logo {
+    font-size: 22px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    cursor: default;
+    user-select: none;
   }
-  @keyframes treeWay { 0%,100%{transform:rotate(-1deg)} 50%{transform:rotate(1deg)} }
-  .deco-tree.left{left:2%} .deco-tree.right{right:2%}
-  .container { position:relative; z-index:10; max-width:900px; margin:0 auto; padding:40px 20px 80px; }
-  header { text-align:center; margin-bottom:44px; animation:fadeDown 1s ease; }
-  .logo-icon { font-size:4rem; display:block; margin-bottom:10px; animation:floatY 4s ease-in-out infinite; }
-  @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-  h1 {
-    font-size:clamp(2rem,5vw,3.5rem); font-weight:900; color:var(--forest);
-    text-shadow:2px 3px 0 rgba(255,255,255,0.8); line-height:1.2; margin-bottom:8px;
+
+  .header-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
   }
-  .subtitle { color:var(--dusk); font-size:1.1rem; opacity:0.85; }
-  .card {
-    background:rgba(255,255,255,0.87); backdrop-filter:blur(20px); border-radius:32px; padding:40px;
-    box-shadow:0 20px 60px rgba(0,0,0,0.1),0 0 0 1px rgba(255,255,255,0.6),inset 0 1px 0 rgba(255,255,255,0.9);
-    animation:fadeUp 1s ease 0.2s both;
+
+  /* Triple click zone - invisible */
+  #secret-zone {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 60px;
+    z-index: 999;
+    cursor: default;
+    user-select: none;
   }
-  @keyframes fadeDown { from{opacity:0;transform:translateY(-30px)} to{opacity:1;transform:translateY(0)} }
-  @keyframes fadeUp   { from{opacity:0;transform:translateY(30px)}  to{opacity:1;transform:translateY(0)} }
-  .upload-zone {
-    border:3px dashed var(--sky); border-radius:24px; padding:50px 30px; text-align:center;
-    cursor:pointer; transition:all 0.3s ease;
-    background:linear-gradient(135deg,rgba(168,216,234,0.1),rgba(127,191,123,0.1));
+
+  /* ===== HERO ===== */
+  .hero {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 80px 20px 60px;
   }
-  .upload-zone:hover,.upload-zone.drag-over {
-    border-color:var(--soft-green);
-    background:linear-gradient(135deg,rgba(168,216,234,0.25),rgba(127,191,123,0.2));
-    transform:scale(1.01);
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    letter-spacing: 1px;
   }
-  .upload-zone input{display:none}
-  .upload-icon{font-size:3.5rem;margin-bottom:15px;display:block}
-  .upload-text{font-size:1.15rem;color:var(--forest);font-weight:600;margin-bottom:6px}
-  .upload-hint{font-size:0.9rem;color:#888}
-  .previews { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:28px; }
-  @media(max-width:600px){ .previews{grid-template-columns:1fr} }
-  .preview-box {
-    border-radius:20px; overflow:hidden; background:#f0f4f8;
-    aspect-ratio:4/3; display:flex; align-items:center; justify-content:center;
-    position:relative; box-shadow:0 4px 20px rgba(0,0,0,0.08);
+
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 20px;
   }
-  .preview-box img { width:100%; height:100%; object-fit:cover; display:block; }
-  .preview-label {
-    position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.55);
-    color:white; padding:4px 12px; border-radius:20px; font-size:0.8rem; backdrop-filter:blur(8px);
+
+  .hero h1 span {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, var(--accent3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  .preview-empty { color:#ccc; font-size:2.5rem; flex-direction:column; display:flex; align-items:center; gap:8px; }
-  .preview-empty span { font-size:0.85rem; color:#bbb; }
-  .style-section { margin-top:28px; }
-  .style-section > p { font-weight:700; color:var(--forest); margin-bottom:12px; font-size:1rem; }
-  .style-chips { display:flex; flex-wrap:wrap; gap:10px; }
-  .chip {
-    padding:8px 18px; border-radius:50px; border:2px solid var(--sky); background:white;
-    color:var(--ink); cursor:pointer; font-family:'Tajawal',sans-serif;
-    font-size:0.9rem; font-weight:500; transition:all 0.25s;
+
+  .hero p {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 500px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+    font-weight: 300;
   }
-  .chip:hover { border-color:var(--soft-green); transform:translateY(-2px); }
-  .chip.active {
-    background:var(--forest); border-color:var(--forest); color:white;
-    box-shadow:0 4px 12px rgba(45,106,79,0.3);
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    flex-wrap: wrap;
   }
-  .btn-convert {
-    margin-top:28px; width:100%; padding:18px;
-    background:linear-gradient(135deg,var(--forest),var(--soft-green));
-    color:white; border:none; border-radius:20px; font-family:'Tajawal',sans-serif;
-    font-size:1.25rem; font-weight:700; cursor:pointer; transition:all 0.3s ease;
-    box-shadow:0 8px 25px rgba(45,106,79,0.35); position:relative; overflow:hidden;
+
+  .stat {
+    text-align: center;
   }
-  .btn-convert::before {
-    content:''; position:absolute; top:-50%; left:-60%; width:40%; height:200%;
-    background:rgba(255,255,255,0.2); transform:skewX(-20deg); transition:left 0.5s ease;
+
+  .stat-num {
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  .btn-convert:hover::before{left:120%}
-  .btn-convert:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(45,106,79,0.45)}
-  .btn-convert:disabled{background:#ccc;box-shadow:none;cursor:not-allowed;transform:none}
-  .loading{display:none;text-align:center;margin-top:28px;padding:28px}
-  .loading.show{display:block}
-  .spinner{width:60px;height:60px;margin:0 auto 18px;position:relative}
-  .spinner::before,.spinner::after{content:'';position:absolute;border-radius:50%;border:4px solid transparent}
-  .spinner::before{inset:0;border-top-color:var(--forest);animation:spin 1s linear infinite}
-  .spinner::after{inset:8px;border-top-color:var(--golden);animation:spin 0.7s linear infinite reverse}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .loading-text{color:var(--forest);font-size:1.05rem;font-weight:600;animation:pulse 1.5s ease-in-out infinite}
-  .loading-sub{color:#888;font-size:0.85rem;margin-top:8px}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-  .result-section{display:none;margin-top:28px}
-  .result-section.show{display:block;animation:fadeUp 0.5s ease}
-  .result-image-wrap{border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.15)}
-  .result-image-wrap img{width:100%;display:block}
-  .result-actions{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
-  .btn-action{flex:1;min-width:120px;padding:14px 20px;border-radius:16px;border:none;font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.25s}
-  .btn-download{background:var(--golden);color:white;box-shadow:0 4px 15px rgba(232,168,56,0.4)}
-  .btn-download:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(232,168,56,0.5)}
-  .btn-reset{background:#f0f4f8;color:var(--ink)}
-  .btn-reset:hover{background:#e0e8f0}
-  .desc-card {
-    background:linear-gradient(135deg,rgba(168,216,234,0.2),rgba(127,191,123,0.15));
-    border:2px solid rgba(127,191,123,0.45); border-radius:20px; padding:24px; margin-top:20px;
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
   }
-  .desc-card h3{color:var(--forest);font-size:1.05rem;margin-bottom:12px;font-weight:700}
-  .desc-card p{color:#444;font-size:0.95rem;line-height:1.95;direction:rtl}
-  .style-badge {
-    display:inline-block; background:rgba(45,106,79,0.12); color:var(--forest);
-    border-radius:20px; padding:3px 14px; font-size:0.82rem; font-weight:700; margin-bottom:14px;
+
+  /* ===== APPS GRID ===== */
+  .section {
+    position: relative;
+    z-index: 1;
+    padding: 40px 40px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  /* ===== APP CARD ===== */
+  .app-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .app-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(108,99,255,0.05), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    border-radius: 20px;
+  }
+
+  .app-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px var(--accent), 0 0 40px var(--glow);
+    border-color: var(--accent);
+  }
+
+  .app-card:hover::before { opacity: 1; }
+
+  .app-banner {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+    background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
+  }
+
+  .app-banner-placeholder {
+    width: 100%;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .app-banner-placeholder::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 40%, rgba(108,99,255,0.3), transparent 60%);
+  }
+
+  .app-body {
+    padding: 20px;
+  }
+
+  .app-header-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .app-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--card2);
+    border: 1px solid var(--border);
+  }
+
+  .app-info { flex: 1; }
+
+  .app-name {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .app-category {
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(108,99,255,0.12);
+    padding: 2px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    font-weight: 600;
+  }
+
+  .app-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 18px;
+    font-weight: 300;
+  }
+
+  .app-footer {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #8b80ff);
+    color: white;
+    box-shadow: 0 4px 15px rgba(108,99,255,0.3);
+  }
+
+  .btn-primary:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 20px rgba(108,99,255,0.5);
+  }
+
+  .btn-secondary {
+    background: var(--card2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-disabled {
+    background: var(--card2);
+    color: var(--muted);
+    border: 1px dashed var(--border);
+    cursor: not-allowed;
+  }
+
+  /* ===== EMPTY CARD (placeholder) ===== */
+  .app-card.empty {
+    border: 2px dashed var(--border);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    flex-direction: column;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 14px;
+    cursor: default;
+  }
+
+  .app-card.empty:hover {
+    border-color: var(--border);
+    transform: none;
+    box-shadow: none;
+  }
+
+  .add-icon {
+    font-size: 40px;
+    opacity: 0.3;
+  }
+
+  /* ===== PASSWORD MODAL ===== */
+  #password-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(16px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+  }
+
+  #password-overlay.show { display: flex; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-8px)} 80%{transform:translateX(8px)} }
+
+  .password-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 40px;
+    width: 360px;
+    max-width: 90vw;
+    text-align: center;
+    animation: slideUp 0.3s ease;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(108,99,255,0.2);
+  }
+
+  .lock-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .modal-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  .pw-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 18px;
+    color: var(--text);
+    text-align: center;
+    letter-spacing: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+
+  .pw-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+  .pw-input.error { border-color: var(--accent2); animation: shake 0.4s ease; }
+
+  .btn-enter {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent), #8b80ff);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(108,99,255,0.4);
+    margin-bottom: 12px;
+  }
+
+  .btn-enter:hover { transform: scale(1.02); }
+
+  .btn-cancel {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 8px;
+    transition: color 0.2s;
+  }
+
+  .btn-cancel:hover { color: var(--text); }
+
+  /* ===== ADMIN PANEL ===== */
+  #admin-panel {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+    animation: fadeIn 0.3s ease;
+    overflow-y: auto;
+  }
+
+  #admin-panel.show { display: flex; }
+
+  .admin-header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .admin-title {
+    font-size: 20px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .admin-badge {
+    background: rgba(255,101,132,0.15);
+    border: 1px solid rgba(255,101,132,0.3);
+    color: var(--accent2);
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+
+  .btn-close-admin {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px;
+    padding: 8px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-close-admin:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .admin-body {
+    padding: 32px;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .admin-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-input, .form-textarea, .form-select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus, .form-textarea:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow);
+  }
+
+  .form-textarea { resize: vertical; min-height: 80px; }
+
+  .form-select option { background: var(--card); }
+
+  .file-upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg);
+  }
+
+  .file-upload-area:hover { border-color: var(--accent); background: rgba(108,99,255,0.04); }
+
+  .file-upload-area input { display: none; }
+
+  .upload-icon { font-size: 32px; display: block; margin-bottom: 8px; }
+  .upload-text { font-size: 13px; color: var(--muted); }
+  .upload-hint { font-size: 11px; color: var(--border); margin-top: 4px; }
+
+  .btn-add-app {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent3), #38d9a9);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    box-shadow: 0 4px 20px rgba(67,233,123,0.3);
+  }
+
+  .btn-add-app:hover { transform: scale(1.02); box-shadow: 0 6px 25px rgba(67,233,123,0.5); }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+  }
+
+  /* Manage apps list */
+  .manage-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .manage-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .manage-icon { font-size: 28px; flex-shrink: 0; }
+
+  .manage-info { flex: 1; }
+
+  .manage-name { font-size: 15px; font-weight: 700; }
+
+  .manage-cat { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .btn-delete {
+    background: rgba(255,101,132,0.1);
+    border: 1px solid rgba(255,101,132,0.2);
+    color: var(--accent2);
+    font-family: 'Cairo', sans-serif;
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-delete:hover { background: rgba(255,101,132,0.2); }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--accent3);
+    color: #0a0a0f;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 14px;
+    z-index: 99999;
+    transition: transform 0.3s ease;
+    pointer-events: none;
+  }
+
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Triple click hint */
+  .click-hint {
+    position: fixed;
+    bottom: 15px;
+    left: 15px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    z-index: 998;
+    opacity: 0.3;
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 16px 20px; }
+    .section { padding: 24px 16px 60px; }
+    .admin-body { padding: 20px 16px; }
+  }
+
+  .preview-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+  }
+
+  .success-anim {
+    animation: successPop 0.4s ease;
+  }
+
+  @keyframes successPop {
+    0% { transform: scale(0.95); opacity: 0.5; }
+    60% { transform: scale(1.03); }
+    100% { transform: scale(1); opacity: 1; }
   }
 </style>
 </head>
 <body>
 
-<div class="sky-bg"></div>
-<div class="cloud cloud-1"></div>
-<div class="cloud cloud-2"></div>
-<div class="cloud cloud-3"></div>
-<div class="deco-tree left">🌲</div>
-<div class="deco-tree right">🌳</div>
+<!-- Header -->
+<header>
+  <div class="logo">🚀 تطبيقاتي</div>
+  <div class="header-subtitle">مجموعة التطبيقات</div>
+</header>
 
-<div class="container">
-  <header>
-    <span class="logo-icon">🐱</span>
-    <h1>زبي جيبلي السحري</h1>
-    <p class="subtitle">حوّل صورتك إلى لوحة فنية بأسلوب استوديو جيبلي ✨</p>
-  </header>
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">✦ مجموعة حصرية</div>
+  <h1>اكتشف <span>تطبيقاتي</span></h1>
+  <p>مجموعة من أفضل التطبيقات والأدوات الرقمية جاهزة للتحميل والاستخدام</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num" id="app-count">0</div><div class="stat-label">تطبيق</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">مجاناً</div></div>
+    <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">متاح</div></div>
+  </div>
+</div>
 
-  <div class="card">
+<!-- Apps Section -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-title">📱 جميع التطبيقات</div>
+    <div class="section-line"></div>
+  </div>
+  <div class="apps-grid" id="apps-grid">
+    <!-- dynamic -->
+  </div>
+</div>
 
-    <div class="upload-zone" id="uploadZone">
-      <input type="file" id="fileInput" accept="image/*">
-      <span class="upload-icon">🖼️</span>
-      <p class="upload-text">اسحب صورتك هنا أو انقر للاختيار</p>
-      <p class="upload-hint">PNG، JPG، WEBP — حتى 10MB</p>
+<!-- Secret zone (bottom-left corner, triple click) -->
+<div id="secret-zone"></div>
+<div class="click-hint" title=""></div>
+
+<!-- Toast -->
+<div id="toast">✓ تم الحفظ بنجاح</div>
+
+<!-- Password Modal -->
+<div id="password-overlay">
+  <div class="password-modal">
+    <span class="lock-icon">🔐</span>
+    <div class="modal-title">لوحة التحكم</div>
+    <div class="modal-subtitle">أدخل كلمة المرور للمتابعة</div>
+    <input type="password" class="pw-input" id="pw-input" placeholder="••••" maxlength="10" autocomplete="off">
+    <button class="btn-enter" onclick="checkPassword()">دخول</button><br>
+    <button class="btn-cancel" onclick="closePasswordModal()">إلغاء</button>
+  </div>
+</div>
+
+<!-- Admin Panel -->
+<div id="admin-panel">
+  <div class="admin-header">
+    <div>
+      <div class="admin-title">⚙️ لوحة التحكم</div>
+    </div>
+    <div class="admin-badge">ADMIN</div>
+    <button class="btn-close-admin" onclick="closeAdmin()">✕ إغلاق</button>
+  </div>
+
+  <div class="admin-body">
+    <div class="admin-section-title">➕ إضافة تطبيق جديد</div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">اسم التطبيق *</label>
+        <input type="text" class="form-input" id="a-name" placeholder="مثال: تطبيق رائع">
+      </div>
+      <div class="form-group">
+        <label class="form-label">التصنيف</label>
+        <select class="form-select" id="a-cat">
+          <option value="أدوات">🔧 أدوات</option>
+          <option value="ترفيه">🎮 ترفيه</option>
+          <option value="تعليم">📚 تعليم</option>
+          <option value="تصميم">🎨 تصميم</option>
+          <option value="إنتاجية">⚡ إنتاجية</option>
+          <option value="تواصل">💬 تواصل</option>
+          <option value="أخرى">📦 أخرى</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">وصف التطبيق *</label>
+        <textarea class="form-textarea" id="a-desc" placeholder="اكتب وصفاً مختصراً عن التطبيق..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">رابط التحميل / الرابط</label>
+        <input type="url" class="form-input" id="a-link" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">الإيموجي / الأيقونة</label>
+        <input type="text" class="form-input" id="a-icon" placeholder="📱" maxlength="4">
+      </div>
+      <div class="form-group full">
+        <label class="form-label">صورة التطبيق (اختياري)</label>
+        <label class="file-upload-area" id="upload-area">
+          <input type="file" id="a-image" accept="image/*" onchange="previewImage(event)">
+          <span class="upload-icon">🖼️</span>
+          <div class="upload-text">اضغط لرفع صورة</div>
+          <div class="upload-hint">PNG, JPG, WebP — حتى 5MB</div>
+        </label>
+        <img id="img-preview" style="display:none;margin-top:10px;border-radius:12px;max-height:120px;border:1px solid var(--border);">
+      </div>
     </div>
 
-    <div class="previews" id="previews" style="display:none;">
-      <div class="preview-box" id="originalBox">
-        <div class="preview-empty">🖼️<span>الأصلية</span></div>
-        <span class="preview-label">الصورة الأصلية</span>
-      </div>
-      <div class="preview-box" id="resultBox">
-        <div class="preview-empty">✨<span>النتيجة</span></div>
-        <span class="preview-label" id="resultLabel">النتيجة</span>
-      </div>
+    <button class="btn-add-app" onclick="addApp()">➕ إضافة التطبيق</button>
+
+    <div class="divider"></div>
+
+    <div class="admin-section-title">📋 إدارة التطبيقات</div>
+    <div class="manage-list" id="manage-list">
+      <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">لا توجد تطبيقات بعد</div>
     </div>
-
-    <div class="style-section">
-      <p>🎨 اختر نمط جيبلي:</p>
-      <div class="style-chips">
-        <button class="chip active" data-style="classic">🌿 جيبلي كلاسيك</button>
-        <button class="chip" data-style="spirited">🏮 الرحلة السحرية</button>
-        <button class="chip" data-style="totoro">🐾 توتورو</button>
-        <button class="chip" data-style="mononoke">🐺 الأميرة مونونوكي</button>
-        <button class="chip" data-style="howl">🏰 قلعة هاول</button>
-        <button class="chip" data-style="nausicaa">🌬️ نوسيكاا</button>
-      </div>
-    </div>
-
-    <button class="btn-convert" id="convertBtn" disabled>🌸 حوّل الصورة الآن</button>
-
-    <div class="loading" id="loading">
-      <div class="spinner"></div>
-      <p class="loading-text">جارٍ نسج السحر... 🌿</p>
-      <p class="loading-sub" id="loadingMsg">تحليل الصورة...</p>
-    </div>
-
-    <div class="result-section" id="resultSection">
-      <div class="result-image-wrap">
-        <img id="resultImg" src="" alt="نتيجة جيبلي">
-      </div>
-      <div class="desc-card" id="descCard" style="display:none">
-        <span class="style-badge" id="styleBadge"></span>
-        <h3>🌸 وصف الصورة المحوّلة:</h3>
-        <p id="descText"></p>
-      </div>
-      <div class="result-actions">
-        <button class="btn-action btn-reset" id="resetBtn">🔄 صورة جديدة</button>
-        <button class="btn-action btn-download" id="downloadBtn">⬇️ تحميل الصورة</button>
-      </div>
-    </div>
-
   </div>
 </div>
 
 <script>
-const STYLES = {
-  classic: {
-    label: '🌿 جيبلي كلاسيك',
-    desc: 'تتحوّل الصورة إلى لوحة بأسلوب ميازاكي الكلاسيكي؛ ألوان دافئة من الأخضر الزمردي والسماء الزرقاء الرقيقة، مع ملامس تشبه الألوان المائية. تمتزج الطبيعة والضوء الناعم في مشهد يوحي بالسكينة والدهشة معاً.',
-    filter: (r,g,b) => ({ r:clamp(r*0.93+12), g:clamp(g*1.12+8), b:clamp(b*1.06+10) }),
-    overlay: 'rgba(200,240,200,0.12)',
-    vignette: 'rgba(60,120,60,0.18)'
-  },
-  spirited: {
-    label: '🏮 الرحلة السحرية',
-    desc: 'تتجلّى الصورة بألوان عميقة ومشبعة تذكّر بعالم حمّامات الأرواح السحرية. تتوهّج الأضواء الذهبية والبرتقالية كأنها فوانيس معلّقة في ليل ياباني، بينما تكسو التفاصيل الدقيقة كل ركن بسحر خفي.',
-    filter: (r,g,b) => ({ r:clamp(r*1.15+20), g:clamp(g*0.88+10), b:clamp(b*0.72) }),
-    overlay: 'rgba(255,160,60,0.10)',
-    vignette: 'rgba(120,40,0,0.25)'
-  },
-  totoro: {
-    label: '🐾 توتورو',
-    desc: 'تتلوّن الصورة بأعشاب ريفية يابانية وسماء باستيل هادئة. يسود مزاج الخمسينيات الريفي الدافئ، مع تدرّجات خضراء عشبية وإضاءة شمسية ناعمة كأنها نسيج من ذكرى طفولة بريئة.',
-    filter: (r,g,b) => ({ r:clamp(r*0.96+18), g:clamp(g*1.14+12), b:clamp(b*0.90+8) }),
-    overlay: 'rgba(180,230,160,0.14)',
-    vignette: 'rgba(40,100,40,0.15)'
-  },
-  mononoke: {
-    label: '🐺 الأميرة مونونوكي',
-    desc: 'تتجلّى الصورة بألوان الغابات القديمة؛ أخضر عميق وأزرق معتم يتخلّله بريق أرواح الأشجار الصغيرة. تفوح منها رائحة الطين والمطر، وتُغلّفها هالة من الصراع الأبدي بين الطبيعة والإنسان.',
-    filter: (r,g,b) => ({ r:clamp(r*0.80+5), g:clamp(g*1.05+8), b:clamp(b*0.95+15) }),
-    overlay: 'rgba(30,80,50,0.18)',
-    vignette: 'rgba(10,40,20,0.35)'
-  },
-  howl: {
-    label: '🏰 قلعة هاول',
-    desc: 'تكتسب الصورة نبرة أوروبية خيالية دافئة؛ درجات العسل والكهرمان تغمر كل تفصيل. تبدو الأجواء كأنها مستلّة من رواية رومانسية عتيقة، حيث يلتقي البخار والسحر في عالم يجمع بين الحنين والدهشة.',
-    filter: (r,g,b) => ({ r:clamp(r*1.18+22), g:clamp(g*1.02+8), b:clamp(b*0.70-5) }),
-    overlay: 'rgba(255,200,80,0.13)',
-    vignette: 'rgba(100,50,0,0.22)'
-  },
-  nausicaa: {
-    label: '🌬️ نوسيكاا',
-    desc: 'تنفتح الصورة على سماوات شاسعة يجتاحها الريح والأمل. تيمن الألوان الزرقاء الفيروزية والخضراء الباردة كل زاوية، بينما تهبّ نسمة خفية تُحرّك الأوشحة والأعشاب في مشهد ما بعد نهاية العالم الجميلة.',
-    filter: (r,g,b) => ({ r:clamp(r*0.82+8), g:clamp(g*1.06+14), b:clamp(b*1.22+20) }),
-    overlay: 'rgba(100,200,220,0.12)',
-    vignette: 'rgba(0,60,100,0.20)'
+// ===== DATA =====
+let apps = JSON.parse(localStorage.getItem('myapps') || '[]');
+
+function saveApps() {
+  localStorage.setItem('myapps', JSON.stringify(apps));
+}
+
+// ===== RENDER APPS =====
+function renderApps() {
+  const grid = document.getElementById('apps-grid');
+  document.getElementById('app-count').textContent = apps.length;
+
+  if (apps.length === 0) {
+    grid.innerHTML = `
+      <div class="app-card empty">
+        <div class="add-icon">📭</div>
+        <div>لا توجد تطبيقات حتى الآن</div>
+      </div>`;
+    return;
   }
-};
 
-const LOADING_MSGS = [
-  'تحليل الصورة... 🔍','مزج ألوان جيبلي... 🎨','رسم الخطوط... ✏️',
-  'إضافة روح الطبيعة... 🌿','تلوين الغيوم... ☁️','اللمسات الأخيرة... 🌸'
-];
+  grid.innerHTML = apps.map((app, i) => `
+    <div class="app-card" onclick="openApp('${app.link || '#'}')">
+      <div class="app-banner-placeholder" style="${app.image ? `background-image:url('${app.image}');background-size:cover;background-position:center` : ''}">
+        ${!app.image ? `<span style="position:relative;z-index:1;font-size:60px">${app.icon || '📱'}</span>` : ''}
+      </div>
+      <div class="app-body">
+        <div class="app-header-row">
+          <div class="app-icon">${app.icon || '📱'}</div>
+          <div class="app-info">
+            <div class="app-name">${app.name}</div>
+            <div class="app-category">${app.category || 'أخرى'}</div>
+          </div>
+        </div>
+        <div class="app-desc">${app.description}</div>
+        <div class="app-footer">
+          ${app.link
+            ? `<a class="btn btn-primary" href="${app.link}" target="_blank" onclick="event.stopPropagation()">⬇️ تحميل</a>`
+            : `<button class="btn btn-disabled">⬇️ قريباً</button>`
+          }
+          <button class="btn btn-secondary" onclick="event.stopPropagation();shareApp(${i})">🔗 مشاركة</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
 
-function clamp(v){ return Math.max(0,Math.min(255,Math.round(v))); }
+  renderManageList();
+}
 
-let uploadedFile=null, selectedStyle='classic', resultDataUrl=null, msgInterval=null;
+function openApp(link) {
+  if (link && link !== '#') window.open(link, '_blank');
+}
 
-const uploadZone=document.getElementById('uploadZone');
-const fileInput=document.getElementById('fileInput');
-const convertBtn=document.getElementById('convertBtn');
+function shareApp(i) {
+  const app = apps[i];
+  const text = `📱 ${app.name}\n${app.description}${app.link ? '\n🔗 ' + app.link : ''}`;
+  if (navigator.share) {
+    navigator.share({ title: app.name, text: text, url: app.link || location.href });
+  } else {
+    navigator.clipboard.writeText(text).then(() => showToast('📋 تم نسخ الرابط'));
+  }
+}
 
-uploadZone.addEventListener('click',()=>fileInput.click());
-uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.classList.add('drag-over');});
-uploadZone.addEventListener('dragleave',()=>uploadZone.classList.remove('drag-over'));
-uploadZone.addEventListener('drop',e=>{
-  e.preventDefault();uploadZone.classList.remove('drag-over');
-  const f=e.dataTransfer.files[0];
-  if(f&&f.type.startsWith('image/'))handleFile(f);
+// ===== TRIPLE CLICK SECRET =====
+let clickCount = 0;
+let clickTimer = null;
+
+document.getElementById('secret-zone').addEventListener('click', function() {
+  clickCount++;
+  clearTimeout(clickTimer);
+  if (clickCount >= 3) {
+    clickCount = 0;
+    openPasswordModal();
+  } else {
+    clickTimer = setTimeout(() => { clickCount = 0; }, 800);
+  }
 });
-fileInput.addEventListener('change',()=>{if(fileInput.files[0])handleFile(fileInput.files[0]);});
 
-function handleFile(file){
-  uploadedFile=file;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const box=document.getElementById('originalBox');
-    box.querySelector('.preview-empty')?.remove();
-    box.querySelector('img')?.remove();
-    const img=document.createElement('img');
-    img.src=e.target.result;
-    box.insertBefore(img,box.querySelector('.preview-label'));
-    document.getElementById('previews').style.display='grid';
-    uploadZone.style.display='none';
-    convertBtn.disabled=false;
-    document.getElementById('resultSection').classList.remove('show');
+// Also allow triple-click on body anywhere by pressing fast
+let bodyClicks = 0;
+let bodyTimer = null;
+document.addEventListener('click', function(e) {
+  // Only if clicking empty areas (not buttons/links)
+  if (e.target.closest('a,button,.app-card,.file-upload-area')) return;
+  bodyClicks++;
+  clearTimeout(bodyTimer);
+  if (bodyClicks >= 3) {
+    bodyClicks = 0;
+    openPasswordModal();
+  } else {
+    bodyTimer = setTimeout(() => { bodyClicks = 0; }, 700);
+  }
+});
+
+function openPasswordModal() {
+  document.getElementById('password-overlay').classList.add('show');
+  setTimeout(() => document.getElementById('pw-input').focus(), 100);
+}
+
+function closePasswordModal() {
+  document.getElementById('password-overlay').classList.remove('show');
+  document.getElementById('pw-input').value = '';
+  document.getElementById('pw-input').classList.remove('error');
+}
+
+function checkPassword() {
+  const val = document.getElementById('pw-input').value;
+  if (val === '2004') {
+    closePasswordModal();
+    openAdmin();
+  } else {
+    const input = document.getElementById('pw-input');
+    input.classList.add('error');
+    input.value = '';
+    setTimeout(() => input.classList.remove('error'), 500);
+  }
+}
+
+document.getElementById('pw-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkPassword();
+  if (e.key === 'Escape') closePasswordModal();
+});
+
+// Close modal on overlay click
+document.getElementById('password-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closePasswordModal();
+});
+
+// ===== ADMIN =====
+function openAdmin() {
+  document.getElementById('admin-panel').classList.add('show');
+  renderManageList();
+}
+
+function closeAdmin() {
+  document.getElementById('admin-panel').classList.remove('show');
+}
+
+let pendingImageData = null;
+
+function previewImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    pendingImageData = ev.target.result;
+    const preview = document.getElementById('img-preview');
+    preview.src = pendingImageData;
+    preview.style.display = 'block';
   };
   reader.readAsDataURL(file);
 }
 
-document.querySelectorAll('.chip').forEach(chip=>{
-  chip.addEventListener('click',()=>{
-    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
-    chip.classList.add('active');
-    selectedStyle=chip.dataset.style;
-  });
-});
+function addApp() {
+  const name = document.getElementById('a-name').value.trim();
+  const desc = document.getElementById('a-desc').value.trim();
+  const link = document.getElementById('a-link').value.trim();
+  const icon = document.getElementById('a-icon').value.trim() || '📱';
+  const cat = document.getElementById('a-cat').value;
 
-convertBtn.addEventListener('click',()=>{
-  if(!uploadedFile)return;
-  convertBtn.disabled=true;
-  document.getElementById('resultSection').classList.remove('show');
-  document.getElementById('loading').classList.add('show');
-  let idx=0;
-  msgInterval=setInterval(()=>{
-    document.getElementById('loadingMsg').textContent=LOADING_MSGS[idx++%LOADING_MSGS.length];
-  },1800);
-  setTimeout(applyGhibliFilter,80);
-});
+  if (!name || !desc) {
+    showToast('⚠️ الاسم والوصف مطلوبان', '#ff6584');
+    return;
+  }
 
-function applyGhibliFilter(){
-  const style=STYLES[selectedStyle];
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const img=new Image();
-    img.onload=()=>{
-      const canvas=document.createElement('canvas');
-      const MAX=1600;
-      let w=img.width,h=img.height;
-      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
-      if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
-      canvas.width=w;canvas.height=h;
-      const ctx=canvas.getContext('2d');
-      ctx.drawImage(img,0,0,w,h);
+  apps.push({ name, description: desc, link, icon, category: cat, image: pendingImageData || null });
+  saveApps();
+  renderApps();
+  showToast('✅ تم إضافة التطبيق');
 
-      // Pixel color grading
-      const id=ctx.getImageData(0,0,w,h);
-      const d=id.data;
-      for(let i=0;i<d.length;i+=4){
-        const res=style.filter(d[i],d[i+1],d[i+2]);
-        d[i]=res.r; d[i+1]=res.g; d[i+2]=res.b;
-      }
-      ctx.putImageData(id,0,0);
-
-      // Soft-light overlay
-      ctx.globalCompositeOperation='soft-light';
-      const grd=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)*0.75);
-      grd.addColorStop(0,style.overlay);
-      grd.addColorStop(1,'rgba(255,255,255,0)');
-      ctx.fillStyle=grd;ctx.fillRect(0,0,w,h);
-
-      // Vignette
-      ctx.globalCompositeOperation='multiply';
-      const vig=ctx.createRadialGradient(w/2,h/2,Math.min(w,h)*0.35,w/2,h/2,Math.max(w,h)*0.75);
-      vig.addColorStop(0,'rgba(255,255,255,1)');
-      vig.addColorStop(1,style.vignette);
-      ctx.fillStyle=vig;ctx.fillRect(0,0,w,h);
-
-      // Grain (hand-drawn feel)
-      const gc=document.createElement('canvas');
-      gc.width=w;gc.height=h;
-      const gctx=gc.getContext('2d');
-      const gd=gctx.createImageData(w,h);
-      for(let i=0;i<gd.data.length;i+=4){
-        const v=Math.random()*18;
-        gd.data[i]=gd.data[i+1]=gd.data[i+2]=v;gd.data[i+3]=255;
-      }
-      gctx.putImageData(gd,0,0);
-      ctx.globalCompositeOperation='screen';
-      ctx.globalAlpha=0.055;
-      ctx.drawImage(gc,0,0);
-      ctx.globalCompositeOperation='source-over';
-      ctx.globalAlpha=1;
-
-      resultDataUrl=canvas.toDataURL('image/jpeg',0.93);
-
-      // Update preview box
-      const box=document.getElementById('resultBox');
-      box.querySelector('.preview-empty')?.remove();
-      box.querySelector('img')?.remove();
-      const rImg=document.createElement('img');
-      rImg.src=resultDataUrl;
-      box.insertBefore(rImg,box.querySelector('.preview-label'));
-      document.getElementById('resultLabel').textContent=style.label;
-
-      // Show result section
-      document.getElementById('resultImg').src=resultDataUrl;
-      document.getElementById('styleBadge').textContent=style.label;
-      document.getElementById('descText').textContent=style.desc;
-      document.getElementById('descCard').style.display='block';
-
-      clearInterval(msgInterval);
-      document.getElementById('loading').classList.remove('show');
-      document.getElementById('resultSection').classList.add('show');
-      convertBtn.disabled=false;
-      document.getElementById('resultSection').scrollIntoView({behavior:'smooth',block:'nearest'});
-    };
-    img.src=e.target.result;
-  };
-  reader.readAsDataURL(uploadedFile);
+  // Reset form
+  document.getElementById('a-name').value = '';
+  document.getElementById('a-desc').value = '';
+  document.getElementById('a-link').value = '';
+  document.getElementById('a-icon').value = '';
+  document.getElementById('img-preview').style.display = 'none';
+  document.getElementById('a-image').value = '';
+  pendingImageData = null;
 }
 
-document.getElementById('downloadBtn').addEventListener('click',()=>{
-  if(!resultDataUrl)return;
-  const a=document.createElement('a');
-  a.href=resultDataUrl;a.download=`ghibli-${selectedStyle}.jpg`;a.click();
-});
+function deleteApp(i) {
+  if (!confirm(`حذف "${apps[i].name}"؟`)) return;
+  apps.splice(i, 1);
+  saveApps();
+  renderApps();
+  showToast('🗑️ تم الحذف', '#ff6584');
+}
 
-document.getElementById('resetBtn').addEventListener('click',()=>{
-  uploadedFile=null;resultDataUrl=null;fileInput.value='';
-  document.getElementById('previews').style.display='none';
-  uploadZone.style.display='block';
-  document.getElementById('resultSection').classList.remove('show');
-  document.getElementById('loading').classList.remove('show');
-  convertBtn.disabled=true;
-  document.getElementById('originalBox').innerHTML='<div class="preview-empty">🖼️<span>الأصلية</span></div><span class="preview-label">الصورة الأصلية</span>';
-  document.getElementById('resultBox').innerHTML='<div class="preview-empty">✨<span>النتيجة</span></div><span class="preview-label" id="resultLabel">النتيجة</span>';
-});
+function renderManageList() {
+  const list = document.getElementById('manage-list');
+  if (!apps.length) {
+    list.innerHTML = `<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">لا توجد تطبيقات بعد</div>`;
+    return;
+  }
+  list.innerHTML = apps.map((app, i) => `
+    <div class="manage-item">
+      <div class="manage-icon">${app.icon}</div>
+      <div class="manage-info">
+        <div class="manage-name">${app.name}</div>
+        <div class="manage-cat">${app.category} ${app.link ? '· ' + app.link.substring(0,30) + '...' : '· بدون رابط'}</div>
+      </div>
+      <button class="btn-delete" onclick="deleteApp(${i})">🗑️ حذف</button>
+    </div>
+  `).join('');
+}
+
+// ===== TOAST =====
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || 'var(--accent3)';
+  t.style.color = color ? 'white' : '#0a0a0f';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== INIT =====
+renderApps();
 </script>
 </body>
 </html>
