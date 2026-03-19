@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تحدي رماية البالونات الواقعي</title>
+    <style>
+        :root {
+            --primary-bg: #1a1a2e;
+            --accent-color: #e94560;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--primary-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #243b55, #141e30);
+            cursor: crosshair;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            padding: 0 20px;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+            color: white;
+            z-index: 10;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Gun Sight Overlay */
+        #crosshair {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+
+        #crosshair::before, #crosshair::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        #crosshair::before { top: 50%; left: 0; width: 100%; height: 1px; }
+        #crosshair::after { left: 50%; top: 0; width: 1px; height: 100%; }
+
+        #start-prompt {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 100;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="ui-layer">
+        <div class="stat-box" id="score-display">النقاط: 0</div>
+    </div>
+
+    <div id="start-prompt" onclick="initAudio()">اضغط للبدء (لتفعيل الصوت)</div>
+
+    <canvas id="gameCanvas"></canvas>
+    <div id="crosshair"></div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('score-display');
+    const crosshair = document.getElementById('crosshair');
+    const startPrompt = document.getElementById('start-prompt');
+
+    let score = 0;
+    let gameActive = false;
+    let balloons = [];
+    let particles = [];
+    let mouse = { x: 0, y: 0 };
+    
+    // Audio Context for synthesizing sounds
+    let audioCtx;
+
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        startPrompt.style.display = 'none';
+        gameActive = true;
+        resetGame();
+    }
+
+    // Sound Synthesizers
+    function playShootSound() {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    function playPopSound() {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+    }
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+        crosshair.style.left = mouse.x + 'px';
+        crosshair.style.top = mouse.y + 'px';
+    });
+
+    window.addEventListener('mousedown', () => { if(gameActive) shoot(); });
+    window.addEventListener('touchstart', (e) => {
+        if(!gameActive) {
+            initAudio();
+            return;
+        }
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+        crosshair.style.left = mouse.x + 'px';
+        crosshair.style.top = mouse.y + 'px';
+        shoot();
+    });
+
+    class Balloon {
+        constructor() {
+            this.radius = Math.random() * 20 + 30;
+            this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
+            this.y = canvas.height + this.radius;
+            this.speed = Math.random() * 2 + 1;
+            this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+            this.noise = Math.random() * 100;
+            this.wobble = Math.random() * 2;
+        }
+
+        draw() {
+            ctx.save();
+            ctx.beginPath();
+            let gradient = ctx.createRadialGradient(
+                this.x - this.radius * 0.3, 
+                this.y - this.radius * 0.3, 
+                this.radius * 0.1, 
+                this.x, 
+                this.y, 
+                this.radius
+            );
+            gradient.addColorStop(0, 'white');
+            gradient.addColorStop(0.2, this.color);
+            gradient.addColorStop(1, 'rgba(0,0,0,0.3)');
+            ctx.fillStyle = gradient;
+            ctx.ellipse(this.x, this.y, this.radius * 0.85, this.radius, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y + this.radius);
+            ctx.lineTo(this.x - 5, this.y + this.radius + 10);
+            ctx.lineTo(this.x + 5, this.y + this.radius + 10);
+            ctx.closePath();
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y + this.radius + 10);
+            ctx.bezierCurveTo(
+                this.x - 10, this.y + this.radius + 30,
+                this.x + 10, this.y + this.radius + 50,
+                this.x, this.y + this.radius + 70
+            );
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        update() {
+            this.y -= this.speed;
+            this.x += Math.sin((this.y + this.noise) * 0.02) * this.wobble;
+        }
+    }
+
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.size = Math.random() * 4 + 2;
+            this.vx = (Math.random() - 0.5) * 10;
+            this.vy = (Math.random() - 0.5) * 10;
+            this.life = 1.0;
+            this.decay = Math.random() * 0.02 + 0.01;
+        }
+
+        draw() {
+            ctx.globalAlpha = this.life;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+        }
+
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vy += 0.1;
+            this.life -= this.decay;
+        }
+    }
+
+    function shoot() {
+        playShootSound();
+        let hit = false;
+        for (let i = balloons.length - 1; i >= 0; i--) {
+            let b = balloons[i];
+            let dist = Math.sqrt((mouse.x - b.x)**2 + (mouse.y - b.y)**2);
+            if (dist < b.radius) {
+                playPopSound();
+                for (let j = 0; j < 15; j++) {
+                    particles.push(new Particle(b.x, b.y, b.color));
+                }
+                balloons.splice(i, 1);
+                score += 10;
+                scoreDisplay.innerText = `النقاط: ${score}`;
+                hit = true;
+                break;
+            }
+        }
+    }
+
+    function drawGun() {
+        const x = canvas.width / 2;
+        const y = canvas.height;
+        let angle = Math.atan2(mouse.y - y, mouse.x - x);
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle + Math.PI/2);
+        ctx.fillStyle = '#111';
+        ctx.fillRect(-12, -70, 24, 90);
+        ctx.fillStyle = '#222';
+        ctx.beginPath();
+        ctx.roundRect(-25, -15, 50, 50, 10);
+        ctx.fill();
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-12, -70, 24, 90);
+        ctx.restore();
+    }
+
+    function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        bgGrad.addColorStop(0, '#0f0c29');
+        bgGrad.addColorStop(0.5, '#302b63');
+        bgGrad.addColorStop(1, '#24243e');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (gameActive) {
+            if (Math.random() < 0.04) balloons.push(new Balloon());
+
+            for (let i = balloons.length - 1; i >= 0; i--) {
+                balloons[i].update();
+                balloons[i].draw();
+                if (balloons[i].y < -balloons[i].radius) balloons.splice(i, 1);
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].life <= 0) particles.splice(i, 1);
+            }
+            drawGun();
+        }
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function resetGame() {
+        score = 0;
+        balloons = [];
+        particles = [];
+        scoreDisplay.innerText = `النقاط: 0`;
+    }
+
+    window.onload = () => {
+        gameLoop();
+    };
+
+</script>
+</body>
+</html>
+
