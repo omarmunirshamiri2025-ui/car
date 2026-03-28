@@ -2,355 +2,175 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>تحدي رماية البالونات الواقعي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محل ابراهيم الحبشي للألمنيوم</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary-bg: #1a1a2e;
-            --accent-color: #e94560;
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap');
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            scroll-behavior: smooth;
         }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: var(--primary-bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            touch-action: none;
+        .hero-gradient {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
         }
 
-        #game-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, #243b55, #141e30);
-            cursor: crosshair;
+        .service-card:hover {
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
         }
 
-        canvas {
-            display: block;
-        }
-
-        #ui-layer {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            padding: 0 20px;
+        #mobileMenu.active {
             display: flex;
-            justify-content: center;
-            pointer-events: none;
-            color: white;
-            z-index: 10;
-        }
-
-        .stat-box {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 30px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-            font-size: 24px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        /* Gun Sight Overlay */
-        #crosshair {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            z-index: 5;
-        }
-
-        #crosshair::before, #crosshair::after {
-            content: '';
-            position: absolute;
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        #crosshair::before { top: 50%; left: 0; width: 100%; height: 1px; }
-        #crosshair::after { left: 50%; top: 0; width: 1px; height: 100%; }
-
-        #start-prompt {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 20px 40px;
-            border-radius: 10px;
-            text-align: center;
-            z-index: 100;
-            cursor: pointer;
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800">
 
-<div id="game-container">
-    <div id="ui-layer">
-        <div class="stat-box" id="score-display">النقاط: 0</div>
-    </div>
+    <!-- Header / Navigation -->
+    <header class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-blue-800">
+                ابراهيم الحبشي <span class="text-gray-500 text-lg font-normal">للألمنيوم</span>
+            </div>
+            
+            <ul class="hidden md:flex space-x-reverse space-x-8 font-medium">
+                <li><a href="#home" class="hover:text-blue-600">الرئيسية</a></li>
+                <li><a href="#services" class="hover:text-blue-600">خدماتنا</a></li>
+                <li><a href="#gallery" class="hover:text-blue-600">أعمالنا</a></li>
+                <li><a href="#contact" class="hover:text-blue-600">اتصل بنا</a></li>
+            </ul>
 
-    <div id="start-prompt" onclick="initAudio()">اضغط للبدء (لتفعيل الصوت)</div>
+            <button class="md:hidden text-2xl" id="menuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
 
-    <canvas id="gameCanvas"></canvas>
-    <div id="crosshair"></div>
-</div>
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden flex-col bg-white border-t p-4 space-y-4 md:hidden">
+            <a href="#home" class="block hover:text-blue-600">الرئيسية</a>
+            <a href="#services" class="block hover:text-blue-600">خدماتنا</a>
+            <a href="#gallery" class="block hover:text-blue-600">أعمالنا</a>
+            <a href="#contact" class="block hover:text-blue-600">اتصل بنا</a>
+        </div>
+    </header>
 
-<script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const scoreDisplay = document.getElementById('score-display');
-    const crosshair = document.getElementById('crosshair');
-    const startPrompt = document.getElementById('start-prompt');
+    <!-- Hero Section -->
+    <section id="home" class="hero-gradient h-screen flex items-center justify-center text-center text-white px-4">
+        <div class="max-w-3xl">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">دقة في التنفيذ.. وفخامة في التصميم</h1>
+            <p class="text-xl mb-8 text-gray-200">نقدم أجود حلول الألمنيوم والزجاج للمنازل والمشاريع التجارية بإشراف ابراهيم الحبشي.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="https://wa.me/967735860389?text=السلام%20عليكم،%20أرغب%20في%20طلب%20خدمة%20ألمنيوم" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-full font-bold transition flex items-center">
+                    <i class="fab fa-whatsapp ml-2"></i> اطلب عبر واتساب
+                </a>
+                <a href="#contact" class="bg-blue-700 hover:bg-blue-800 text-white px-8 py-3 rounded-full font-bold transition">اطلب عبر الموقع</a>
+            </div>
+        </div>
+    </section>
 
-    let score = 0;
-    let gameActive = false;
-    let balloons = [];
-    let particles = [];
-    let mouse = { x: 0, y: 0 };
-    
-    // Audio Context for synthesizing sounds
-    let audioCtx;
+    <!-- Services Section -->
+    <section id="services" class="py-20 container mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">خدماتنا المتميزة</h2>
+            <div class="w-20 h-1 bg-blue-600 mx-auto"></div>
+        </div>
 
-    function initAudio() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        startPrompt.style.display = 'none';
-        gameActive = true;
-        resetGame();
-    }
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="service-card bg-white p-8 rounded-2xl shadow-lg text-center border-t-4 border-blue-600">
+                <div class="text-4xl text-blue-600 mb-4"><i class="fas fa-door-open"></i></div>
+                <h3 class="text-xl font-bold mb-4">أبواب ألمنيوم</h3>
+                <p class="text-gray-600 text-sm">أبواب خارجية وداخلية بتصاميم عصرية ومقاومة للعوامل الجوية والصدأ.</p>
+            </div>
+            <div class="service-card bg-white p-8 rounded-2xl shadow-lg text-center border-t-4 border-blue-600">
+                <div class="text-4xl text-blue-600 mb-4"><i class="fas fa-th-large"></i></div>
+                <h3 class="text-xl font-bold mb-4">نوافذ وشبابيك</h3>
+                <p class="text-gray-600 text-sm">أنظمة عزل حراري وصوتي متطورة (سحاب ومفصلي) بألوان متنوعة.</p>
+            </div>
+            <div class="service-card bg-white p-8 rounded-2xl shadow-lg text-center border-t-4 border-blue-600">
+                <div class="text-4xl text-blue-600 mb-4"><i class="fas fa-utensils"></i></div>
+                <h3 class="text-xl font-bold mb-4">مطابخ حديثة</h3>
+                <p class="text-gray-600 text-sm">تصميم وتفصيل مطابخ ألمنيوم بأرقى الموديلات التي تجمع بين المتانة والجمال.</p>
+            </div>
+        </div>
+    </section>
 
-    // Sound Synthesizers
-    function playShootSound() {
-        if (!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.1);
-    }
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 container mx-auto px-6">
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-wrap">
+            <div class="w-full md:w-1/2 p-12 bg-blue-800 text-white">
+                <h2 class="text-3xl font-bold mb-8">تواصل مباشرة</h2>
+                <p class="mb-8 opacity-80">يسعدنا استقبال استفساراتكم وطلباتكم في أي وقت.</p>
+                
+                <div class="space-y-6">
+                    <div class="flex items-center">
+                        <i class="fas fa-phone-alt ml-4 text-2xl"></i>
+                        <span dir="ltr">+967 735 860 389</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-envelope ml-4 text-2xl"></i>
+                        <span>info@alhubayshi.com</span>
+                    </div>
+                    <a href="https://wa.me/967735860389" target="_blank" class="flex items-center hover:text-green-400 transition">
+                        <i class="fab fa-whatsapp ml-4 text-2xl"></i>
+                        <span>تواصل عبر واتساب</span>
+                    </a>
+                </div>
+            </div>
 
-    function playPopSound() {
-        if (!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.05);
-    }
+            <div class="w-full md:w-1/2 p-12">
+                <form action="https://formspree.io/f/mqakpzoz" method="POST">
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold mb-2">الاسم بالكامل</label>
+                        <input type="text" name="name" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-600">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold mb-2">رقم الجوال</label>
+                        <input type="tel" name="phone" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-600">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold mb-2">نوع الخدمة</label>
+                        <select name="service" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-600">
+                            <option value="أبواب">أبواب</option>
+                            <option value="نوافذ">نوافذ</option>
+                            <option value="مطابخ">مطابخ</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold mb-2">تفاصيل الطلب</label>
+                        <textarea name="message" rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-600"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-700 text-white py-4 rounded-lg font-bold hover:bg-blue-800 transition shadow-lg shadow-blue-200">إرسال الطلب</button>
+                </form>
+            </div>
+        </div>
+    </section>
 
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
+        <div class="container mx-auto px-6 text-center">
+            <div class="text-white text-2xl font-bold mb-4">ابراهيم الحبشي</div>
+            <div class="text-sm">
+                &copy; 2024 جميع الحقوق محفوظة لمحل ابراهيم الحبشي للألمنيوم
+            </div>
+        </div>
+    </footer>
 
-    window.addEventListener('mousemove', (e) => {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-        crosshair.style.left = mouse.x + 'px';
-        crosshair.style.top = mouse.y + 'px';
-    });
-
-    window.addEventListener('mousedown', () => { if(gameActive) shoot(); });
-    window.addEventListener('touchstart', (e) => {
-        if(!gameActive) {
-            initAudio();
-            return;
-        }
-        mouse.x = e.touches[0].clientX;
-        mouse.y = e.touches[0].clientY;
-        crosshair.style.left = mouse.x + 'px';
-        crosshair.style.top = mouse.y + 'px';
-        shoot();
-    });
-
-    class Balloon {
-        constructor() {
-            this.radius = Math.random() * 20 + 30;
-            this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
-            this.y = canvas.height + this.radius;
-            this.speed = Math.random() * 2 + 1;
-            this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
-            this.noise = Math.random() * 100;
-            this.wobble = Math.random() * 2;
-        }
-
-        draw() {
-            ctx.save();
-            ctx.beginPath();
-            let gradient = ctx.createRadialGradient(
-                this.x - this.radius * 0.3, 
-                this.y - this.radius * 0.3, 
-                this.radius * 0.1, 
-                this.x, 
-                this.y, 
-                this.radius
-            );
-            gradient.addColorStop(0, 'white');
-            gradient.addColorStop(0.2, this.color);
-            gradient.addColorStop(1, 'rgba(0,0,0,0.3)');
-            ctx.fillStyle = gradient;
-            ctx.ellipse(this.x, this.y, this.radius * 0.85, this.radius, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(this.x, this.y + this.radius);
-            ctx.lineTo(this.x - 5, this.y + this.radius + 10);
-            ctx.lineTo(this.x + 5, this.y + this.radius + 10);
-            ctx.closePath();
-            ctx.fillStyle = this.color;
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(this.x, this.y + this.radius + 10);
-            ctx.bezierCurveTo(
-                this.x - 10, this.y + this.radius + 30,
-                this.x + 10, this.y + this.radius + 50,
-                this.x, this.y + this.radius + 70
-            );
-            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        update() {
-            this.y -= this.speed;
-            this.x += Math.sin((this.y + this.noise) * 0.02) * this.wobble;
-        }
-    }
-
-    class Particle {
-        constructor(x, y, color) {
-            this.x = x;
-            this.y = y;
-            this.color = color;
-            this.size = Math.random() * 4 + 2;
-            this.vx = (Math.random() - 0.5) * 10;
-            this.vy = (Math.random() - 0.5) * 10;
-            this.life = 1.0;
-            this.decay = Math.random() * 0.02 + 0.01;
-        }
-
-        draw() {
-            ctx.globalAlpha = this.life;
-            ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1.0;
-        }
-
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            this.vy += 0.1;
-            this.life -= this.decay;
-        }
-    }
-
-    function shoot() {
-        playShootSound();
-        let hit = false;
-        for (let i = balloons.length - 1; i >= 0; i--) {
-            let b = balloons[i];
-            let dist = Math.sqrt((mouse.x - b.x)**2 + (mouse.y - b.y)**2);
-            if (dist < b.radius) {
-                playPopSound();
-                for (let j = 0; j < 15; j++) {
-                    particles.push(new Particle(b.x, b.y, b.color));
-                }
-                balloons.splice(i, 1);
-                score += 10;
-                scoreDisplay.innerText = `النقاط: ${score}`;
-                hit = true;
-                break;
-            }
-        }
-    }
-
-    function drawGun() {
-        const x = canvas.width / 2;
-        const y = canvas.height;
-        let angle = Math.atan2(mouse.y - y, mouse.x - x);
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(angle + Math.PI/2);
-        ctx.fillStyle = '#111';
-        ctx.fillRect(-12, -70, 24, 90);
-        ctx.fillStyle = '#222';
-        ctx.beginPath();
-        ctx.roundRect(-25, -15, 50, 50, 10);
-        ctx.fill();
-        ctx.strokeStyle = '#555';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(-12, -70, 24, 90);
-        ctx.restore();
-    }
-
-    function gameLoop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        bgGrad.addColorStop(0, '#0f0c29');
-        bgGrad.addColorStop(0.5, '#302b63');
-        bgGrad.addColorStop(1, '#24243e');
-        ctx.fillStyle = bgGrad;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        if (gameActive) {
-            if (Math.random() < 0.04) balloons.push(new Balloon());
-
-            for (let i = balloons.length - 1; i >= 0; i--) {
-                balloons[i].update();
-                balloons[i].draw();
-                if (balloons[i].y < -balloons[i].radius) balloons.splice(i, 1);
-            }
-
-            for (let i = particles.length - 1; i >= 0; i--) {
-                particles[i].update();
-                particles[i].draw();
-                if (particles[i].life <= 0) particles.splice(i, 1);
-            }
-            drawGun();
-        }
-
-        requestAnimationFrame(gameLoop);
-    }
-
-    function resetGame() {
-        score = 0;
-        balloons = [];
-        particles = [];
-        scoreDisplay.innerText = `النقاط: 0`;
-    }
-
-    window.onload = () => {
-        gameLoop();
-    };
-
-</script>
+    <script>
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('flex');
+        });
+    </script>
 </body>
 </html>
 
