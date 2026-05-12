@@ -1,176 +1,110 @@
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محل ابراهيم الحبشي للألمنيوم</title>
+    <title>سياسة الخصوصية | مشغل الفيديوهات الأسد</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap');
-        
         body {
             font-family: 'Tajawal', sans-serif;
             scroll-behavior: smooth;
         }
-
-        .hero-gradient {
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
-            background-size: cover;
-            background-position: center;
+        .gradient-bg {
+            background: linear-gradient(135deg, #1a1a1a 0%, #3d3d3d 100%);
         }
-
-        .service-card:hover {
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-        }
-
-        #mobileMenu.active {
-            display: flex;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <!-- Header / Navigation -->
-    <header class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-bold text-blue-800">
-                ابراهيم الحبشي <span class="text-gray-500 text-lg font-normal">للألمنيوم</span>
+    <!-- Header / Hero Section -->
+    <header class="gradient-bg text-white py-16 px-4 text-center">
+        <div class="max-w-4xl mx-auto">
+            <div class="mb-6 inline-block p-4 bg-yellow-500 rounded-full shadow-lg">
+                <!-- Simple SVG Lion/Video Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
             </div>
-            
-            <ul class="hidden md:flex space-x-reverse space-x-8 font-medium">
-                <li><a href="#home" class="hover:text-blue-600">الرئيسية</a></li>
-                <li><a href="#services" class="hover:text-blue-600">خدماتنا</a></li>
-                <li><a href="#gallery" class="hover:text-blue-600">أعمالنا</a></li>
-                <li><a href="#contact" class="hover:text-blue-600">اتصل بنا</a></li>
-            </ul>
-
-            <button class="md:hidden text-2xl" id="menuBtn">
-                <i class="fas fa-bars"></i>
-            </button>
-        </nav>
-
-        <!-- Mobile Menu -->
-        <div id="mobileMenu" class="hidden flex-col bg-white border-t p-4 space-y-4 md:hidden">
-            <a href="#home" class="block hover:text-blue-600">الرئيسية</a>
-            <a href="#services" class="block hover:text-blue-600">خدماتنا</a>
-            <a href="#gallery" class="block hover:text-blue-600">أعمالنا</a>
-            <a href="#contact" class="block hover:text-blue-600">اتصل بنا</a>
+            <h1 class="text-4xl font-bold mb-4">مشغل الفيديوهات الأسد</h1>
+            <p class="text-xl opacity-90">سياسة الخصوصية وشروط الاستخدام</p>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero-gradient h-screen flex items-center justify-center text-center text-white px-4">
-        <div class="max-w-3xl">
-            <h1 class="text-4xl md:text-6xl font-bold mb-6">دقة في التنفيذ.. وفخامة في التصميم</h1>
-            <p class="text-xl mb-8 text-gray-200">نقدم أجود حلول الألمنيوم والزجاج للمنازل والمشاريع التجارية بإشراف ابراهيم الحبشي.</p>
-            <div class="flex flex-wrap justify-center gap-4">
-                <a href="https://wa.me/967735860389?text=السلام%20عليكم،%20أرغب%20في%20طلب%20خدمة%20ألمنيوم" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-full font-bold transition flex items-center">
-                    <i class="fab fa-whatsapp ml-2"></i> اطلب عبر واتساب
-                </a>
-                <a href="#contact" class="bg-blue-700 hover:bg-blue-800 text-white px-8 py-3 rounded-full font-bold transition">اطلب عبر الموقع</a>
-            </div>
-        </div>
-    </section>
+    <main class="max-w-4xl mx-auto px-4 -mt-10 mb-20">
+        <div class="glass-card p-8 md:p-12">
+            
+            <!-- Intro -->
+            <section class="mb-10">
+                <h2 class="text-2xl font-bold text-yellow-700 mb-4 border-r-4 border-yellow-500 pr-3">مقدمة</h2>
+                <p class="leading-relaxed">
+                    نحن في تطبيق <strong>"مشغل الفيديوهات الأسد"</strong> نلتزم بأقصى درجات الحماية لخصوصيتك. توضح هذه الصفحة كيف نتعامل مع بياناتك عند استخدام تطبيقنا المخصص لتشغيل الفيديوهات المخزنة محلياً على هاتفك.
+                </p>
+            </section>
 
-    <!-- Services Section -->
-    <section id="services" class="py-20 container mx-auto px-6">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">خدماتنا المتميزة</h2>
-            <div class="w-20 h-1 bg-blue-600 mx-auto"></div>
-        </div>
+            <!-- Data Collection -->
+            <section class="mb-10">
+                <h2 class="text-2xl font-bold text-yellow-700 mb-4 border-r-4 border-yellow-500 pr-3">جمع المعلومات واستخدامها</h2>
+                <p class="mb-4">تطبيقنا لا يقوم بجمع أي بيانات شخصية (مثل الاسم، الإيميل، أو رقم الهاتف) وإرسالها إلى خوادم خارجية. التطبيق يعمل بشكل محلي بالكامل:</p>
+                <ul class="list-disc list-inside space-y-2 mr-4">
+                    <li><strong>الوصول للملفات:</strong> يحتاج التطبيق للوصول إلى ذاكرة التخزين لعرض وتشغيل الفيديوهات الخاصة بك.</li>
+                    <li><strong>بيانات الاستخدام:</strong> قد نقوم بجمع بيانات تقنية غير معرفة للهوية (مثل نوع الجهاز، إصدار النظام) لتحسين أداء التطبيق فقط.</li>
+                </ul>
+            </section>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="service-card bg-white p-8 rounded-2xl shadow-lg text-center border-t-4 border-blue-600">
-                <div class="text-4xl text-blue-600 mb-4"><i class="fas fa-door-open"></i></div>
-                <h3 class="text-xl font-bold mb-4">أبواب ألمنيوم</h3>
-                <p class="text-gray-600 text-sm">أبواب خارجية وداخلية بتصاميم عصرية ومقاومة للعوامل الجوية والصدأ.</p>
-            </div>
-            <div class="service-card bg-white p-8 rounded-2xl shadow-lg text-center border-t-4 border-blue-600">
-                <div class="text-4xl text-blue-600 mb-4"><i class="fas fa-th-large"></i></div>
-                <h3 class="text-xl font-bold mb-4">نوافذ وشبابيك</h3>
-                <p class="text-gray-600 text-sm">أنظمة عزل حراري وصوتي متطورة (سحاب ومفصلي) بألوان متنوعة.</p>
-            </div>
-            <div class="service-card bg-white p-8 rounded-2xl shadow-lg text-center border-t-4 border-blue-600">
-                <div class="text-4xl text-blue-600 mb-4"><i class="fas fa-utensils"></i></div>
-                <h3 class="text-xl font-bold mb-4">مطابخ حديثة</h3>
-                <p class="text-gray-600 text-sm">تصميم وتفصيل مطابخ ألمنيوم بأرقى الموديلات التي تجمع بين المتانة والجمال.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="py-20 container mx-auto px-6">
-        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-wrap">
-            <div class="w-full md:w-1/2 p-12 bg-blue-800 text-white">
-                <h2 class="text-3xl font-bold mb-8">تواصل مباشرة</h2>
-                <p class="mb-8 opacity-80">يسعدنا استقبال استفساراتكم وطلباتكم في أي وقت.</p>
-                
-                <div class="space-y-6">
-                    <div class="flex items-center">
-                        <i class="fas fa-phone-alt ml-4 text-2xl"></i>
-                        <span dir="ltr">+967 735 860 389</span>
+            <!-- Permissions -->
+            <section class="mb-10 bg-yellow-50 p-6 rounded-lg">
+                <h2 class="text-2xl font-bold text-yellow-700 mb-4 border-r-4 border-yellow-500 pr-3">الأذونات المطلوبة</h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-white rounded shadow-sm">
+                        <h3 class="font-bold mb-2">القراءة والكتابة (Storage)</h3>
+                        <p class="text-sm">للوصول إلى ملفات الفيديو وحفظ إعدادات التشغيل أو لقطات الشاشة.</p>
                     </div>
-                    <div class="flex items-center">
-                        <i class="fas fa-envelope ml-4 text-2xl"></i>
-                        <span>info@alhubayshi.com</span>
+                    <div class="p-4 bg-white rounded shadow-sm">
+                        <h3 class="font-bold mb-2">منع السكون (Wake Lock)</h3>
+                        <p class="text-sm">لضمان عدم انطفاء الشاشة أثناء مشاهدتك للفيديو.</p>
                     </div>
-                    <a href="https://wa.me/967735860389" target="_blank" class="flex items-center hover:text-green-400 transition">
-                        <i class="fab fa-whatsapp ml-4 text-2xl"></i>
-                        <span>تواصل عبر واتساب</span>
-                    </a>
                 </div>
-            </div>
+            </section>
 
-            <div class="w-full md:w-1/2 p-12">
-                <form action="https://formspree.io/f/mqakpzoz" method="POST">
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold mb-2">الاسم بالكامل</label>
-                        <input type="text" name="name" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-600">
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold mb-2">رقم الجوال</label>
-                        <input type="tel" name="phone" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-600">
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold mb-2">نوع الخدمة</label>
-                        <select name="service" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-600">
-                            <option value="أبواب">أبواب</option>
-                            <option value="نوافذ">نوافذ</option>
-                            <option value="مطابخ">مطابخ</option>
-                            <option value="أخرى">أخرى</option>
-                        </select>
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold mb-2">تفاصيل الطلب</label>
-                        <textarea name="message" rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-600"></textarea>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-700 text-white py-4 rounded-lg font-bold hover:bg-blue-800 transition shadow-lg shadow-blue-200">إرسال الطلب</button>
-                </form>
-            </div>
-        </div>
-    </section>
+            <!-- Third Party Services -->
+            <section class="mb-10">
+                <h2 class="text-2xl font-bold text-yellow-700 mb-4 border-r-4 border-yellow-500 pr-3">خدمات الطرف الثالث</h2>
+                <p>قد يستخدم التطبيق خدمات تابعة لأطراف ثالثة (مثل AdMob للإعلانات أو Firebase للتحليلات) والتي قد تجمع معلومات تستخدم لتحديد هويتك وفقاً لسياساتهم الخاصة.</p>
+            </section>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
-        <div class="container mx-auto px-6 text-center">
-            <div class="text-white text-2xl font-bold mb-4">ابراهيم الحبشي</div>
-            <div class="text-sm">
-                &copy; 2024 جميع الحقوق محفوظة لمحل ابراهيم الحبشي للألمنيوم
-            </div>
+            <!-- Children's Privacy -->
+            <section class="mb-10">
+                <h2 class="text-2xl font-bold text-yellow-700 mb-4 border-r-4 border-yellow-500 pr-3">خصوصية الأطفال</h2>
+                <p>هذه الخدمات لا تخاطب أي شخص يقل عمره عن 13 عاماً. نحن لا نجمع معلومات تعريف شخصية من الأطفال عن علم.</p>
+            </section>
+
+            <!-- Contact Us -->
+            <section class="text-center bg-gray-100 p-8 rounded-xl border-2 border-dashed border-gray-300">
+                <h2 class="text-2xl font-bold mb-4">هل لديك استفسار؟</h2>
+                <p class="mb-6">إذا كان لديك أي أسئلة أو اقتراحات حول سياسة الخصوصية الخاصة بنا، لا تتردد في الاتصال بنا.</p>
+                <a href="mailto:support@lionplayer.com" class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-8 rounded-full transition duration-300">
+                    تواصل معنا عبر البريد
+                </a>
+            </section>
+
         </div>
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 py-8 text-center">
+        <p>&copy; 2026 جميع الحقوق محفوظة لـ "مشغل الفيديوهات الأسد"</p>
     </footer>
 
-    <script>
-        const menuBtn = document.getElementById('menuBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        
-        menuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            mobileMenu.classList.toggle('flex');
-        });
-    </script>
 </body>
 </html>
 
+```
